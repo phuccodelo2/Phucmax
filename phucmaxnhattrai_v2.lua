@@ -9,7 +9,7 @@ end)
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
-        Text = "✅ Đã khởi động script thành công!",
+        Text = "lần đầu tiên mình làm nếu có lỗi gì báo ad nha",
         Duration = 6
     })
 end)
@@ -116,7 +116,7 @@ spawn(function()
             if idleTime >= 5 or not getNearestFruit() then
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "phucmaxnhattrai",
-                    Text = "⏭️ Đổi server do không có trái hoặc đứng yên quá lâu!",
+                    Text = "❌ trái đang đổi sever ",
                     Duration = 5
                 })
                 local HttpService = game:GetService("HttpService")
