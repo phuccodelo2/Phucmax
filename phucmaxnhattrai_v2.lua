@@ -130,26 +130,96 @@ spawn(function()
     end
 end)
 
--- Auto hop server nếu không còn trái
-function HopServer()
+-- 🔁 Auto đổi server liên tục nếu không có trái
+function HopUntilFruit()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
-    local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-    local servers = HttpService:JSONDecode(game:HttpGet(url)).data
-    for _, s in pairs(servers) do
-        if s.playing < s.maxPlayers and s.id ~= game.JobId then
-            TeleportService:TeleportToPlaceInstance(PlaceId, s.id, game.Players.LocalPlayer)
-            break
+    local function getServers()
+        local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+        local body = game:HttpGet(url)
+        return HttpService:JSONDecode(body).data
+    end
+
+    local tried = {}
+    while true do
+        local servers = getServers()
+        for _, s in ipairs(servers) do
+            if s.playing < s.maxPlayers and s.id ~= game.JobId and not tried[s.id] then
+                tried[s.id] = true
+                TeleportService:TeleportToPlaceInstance(PlaceId, s.id, game.Players.LocalPlayer)
+                wait(10) -- đợi load server mới
+                -- nếu vào server rồi mà có fruit thì tự dừng
+                local found = false
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("Tool") and obj:FindFirstChild("Handle") and obj.Name:lower():find("fruit") then
+                        found = true
+                        break
+                    end
+                end
+                if found then return end
+            end
         end
+        wait(2)
     end
 end
 
--- Đổi server nếu không còn trái
+-- 🔁 Kiểm tra trái sau mỗi 5s, nếu không có thì bắt đầu đổi liên tục
 spawn(function()
     while wait(5) do
         if not getNearestFruit() then
-            HopServer()
+            HopUntilFruit()
         end
+    end
+end)
+local idLogo = "rbxassetid://123394707028201"
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "phucmaxnhattraiUI"
+
+local logoFrame = Instance.new("ImageLabel")
+logoFrame.Name = "LogoFrame"
+logoFrame.Parent = ScreenGui
+logoFrame.AnchorPoint = Vector2.new(0.5, 0)
+logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
+logoFrame.Size = UDim2.new(0, 220, 0, 80)
+logoFrame.BackgroundTransparency = 1
+logoFrame.Image = idLogo
+logoFrame.ScaleType = Enum.ScaleType.Stretch
+
+local stroke = Instance.new("UIStroke", logoFrame)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+spawn(function()
+    local colors = {
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(148, 0, 211),
+        Color3.fromRGB(255, 255, 0)
+    }
+    while true do
+        for _, color in ipairs(colors) do
+            stroke.Color = color
+            wait(0.5)
+        end
+    end
+end)
+
+local fpsLabel = Instance.new("TextLabel", ScreenGui)
+fpsLabel.Name = "FPSCounter"
+fpsLabel.Position = UDim2.new(0.01, 0, 0.01, 0)
+fpsLabel.Size = UDim2.new(0, 100, 0, 30)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+fpsLabel.TextStrokeTransparency = 0
+fpsLabel.TextSize = 20
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: ..."
+
+spawn(function()
+    local RunService = game:GetService("RunService")
+    while wait(0.2) do
+        local fps = math.floor(1 / RunService.RenderStepped:Wait())
+        fpsLabel.Text = "FPS: " .. tostring(fps)
     end
 end)
