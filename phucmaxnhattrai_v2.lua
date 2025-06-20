@@ -68,42 +68,6 @@ function getNearestFruit()
     return closest
 end
 
--- ✈️ Bay thẳng đến trái (không giữ độ cao)
-local flying = false
-local fruitTarget = nil
-function flyToFruitStraight(pos)
-    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    if hrp:FindFirstChild("FruitFly") then hrp.FruitFly:Destroy() end
-
-    local bv = Instance.new("BodyVelocity", hrp)
-    bv.Name = "FruitFly"
-    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-    bv.Velocity = Vector3.zero
-
-    flying = true
-    spawn(function()
-        while flying and fruitTarget and fruitTarget:FindFirstChild("Handle") do
-            local dir = (fruitTarget.Handle.Position - hrp.Position)
-            if dir.Magnitude < 5 then flying = false break end
-            bv.Velocity = dir.Unit * 300
-            wait()
-        end
-        bv:Destroy()
-    end)
-end
-
--- ♻️ Vòng lặp bay + ESP
-spawn(function()
-    while wait(0.5) do
-        for _, obj in pairs(workspace:GetChildren()) do addESP(obj) end
-        local fruit = getNearestFruit()
-        if fruit and fruit:FindFirstChild("Handle") then
-            fruitTarget = fruit
-            flyToFruitStraight(fruit.Handle.Position)
-        end
-    end
-end)
 
 -- 💾 Tự lưu trái
 spawn(function()
