@@ -9,12 +9,12 @@ end)
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
-        Text = "✅ Lần đầu mình làm, nếu lỗi báo ad nha",
+        Text = "✅ Đã khởi động script thành công!",
         Duration = 6
     })
 end)
 
--- ✅ Danh sách trái lưu
+-- ✅ Danh sách trái cần lưu
 local fruitList = {
     ["Rocket Fruit"] = "Rocket-Rocket", ["Spin Fruit"] = "Spin-Spin", ["Chop Fruit"] = "Chop-Chop",
     ["Spring Fruit"] = "Spring-Spring", ["Bomb Fruit"] = "Bomb-Bomb", ["Smoke Fruit"] = "Smoke-Smoke",
@@ -31,7 +31,7 @@ local fruitList = {
     ["Dragon Fruit"] = "Dragon-Dragon", ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune"
 }
 
--- ✅ ESP Trái
+-- ✅ ESP hiển thị trái
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
@@ -46,7 +46,7 @@ function addESP(obj)
         local label = Instance.new("TextLabel", gui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = obj.Name .. " (" .. math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Handle.Position).Magnitude) .. "m)"
+        label.Text = obj:IsDescendantOf(workspace) and (obj.Name.." (Fruit?)") or obj.Name
         label.TextColor3 = Color3.fromRGB(255, 170, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
@@ -57,7 +57,7 @@ end
 -- ✅ Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
-    for _, obj in pairs(game.Workspace:GetChildren()) do
+    for _, obj in pairs(workspace:GetChildren()) do
         if obj:IsA("Tool") and obj:FindFirstChild("Handle") and obj.Name:lower():find("fruit") then
             local mag = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Handle.Position).Magnitude
             if mag < dist then
@@ -68,47 +68,35 @@ function getNearestFruit()
     return closest
 end
 
--- ✅ Bay mượt đến trái
+-- ✅ Bay mượt (BodyVelocity, xuyên tường)
 local flying = false
 local fruitTarget = nil
-
-function flyToFruitSmooth(fruitPos)
+function flyToFruitSmooth(pos)
     local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
+    if hrp:FindFirstChild("FruitFly") then hrp.FruitFly:Destroy() end
 
-    if hrp:FindFirstChild("FruitFly") then
-        hrp.FruitFly:Destroy()
-    end
-
-    local bv = Instance.new("BodyVelocity")
+    local bv = Instance.new("BodyVelocity", hrp)
     bv.Name = "FruitFly"
     bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
     bv.Velocity = Vector3.zero
-    bv.P = 300
-    bv.Parent = hrp
 
     flying = true
     spawn(function()
         while flying and fruitTarget and fruitTarget:FindFirstChild("Handle") do
-            local dir = (fruitTarget.Handle.Position + Vector3.new(0, 20, 0) - hrp.Position)
-            local dist = dir.Magnitude
-            if dist < 5 then
-                flying = false
-                break
-            end
+            local dir = (fruitTarget.Handle.Position + Vector3.new(0, 15, 0)) - hrp.Position
+            if dir.Magnitude < 5 then flying = false break end
             bv.Velocity = dir.Unit * 300
             wait()
         end
-        if bv and bv.Parent then bv:Destroy() end
+        bv:Destroy()
     end)
 end
 
--- ✅ Bay + ESP liên tục
+-- ✅ Quét liên tục + bay
 spawn(function()
     while wait(0.5) do
-        for _, obj in pairs(game.Workspace:GetChildren()) do
-            addESP(obj)
-        end
+        for _, obj in pairs(workspace:GetChildren()) do addESP(obj) end
         local fruit = getNearestFruit()
         if fruit and fruit:FindFirstChild("Handle") then
             fruitTarget = fruit
@@ -117,7 +105,7 @@ spawn(function()
     end
 end)
 
--- ✅ Auto lưu vào kho
+-- ✅ Lưu trái vào kho
 spawn(function()
     while wait(1) do
         pcall(function()
@@ -132,23 +120,22 @@ spawn(function()
     end
 end)
 
--- ✅ Auto hop server
+-- ✅ Auto hop server khi không có trái
 function HopServer()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
     local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
     local servers = HttpService:JSONDecode(game:HttpGet(url)).data
-    table.sort(servers, function(a, b) return a.playing < b.playing end)
-    for _, server in pairs(servers) do
-        if server.playing < server.maxPlayers and server.id ~= game.JobId then
-            TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+    for _, s in pairs(servers) do
+        if s.playing < s.maxPlayers and s.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(PlaceId, s.id, game.Players.LocalPlayer)
             break
         end
     end
 end
 
--- ✅ Kiểm tra đứng yên hoặc không có trái thì hop
+-- ✅ Nếu đứng yên hoặc không trái thì hop
 spawn(function()
     local lastPos = nil
     local idleTime = 0
@@ -161,7 +148,6 @@ spawn(function()
                 idleTime = 0
             end
             lastPos = hrp.Position
-
             if idleTime >= 5 or not getNearestFruit() then
                 HopServer()
             end
@@ -171,61 +157,51 @@ end)
 
 -- ✅ Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
-local RunService = game:GetService("RunService")
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "phucmaxnhattraiUI"
 
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "phucmaxnhattraiUI"
+local img = Instance.new("ImageLabel", gui)
+img.Name = "Logo"
+img.Size = UDim2.new(0, 220, 0, 80)
+img.Position = UDim2.new(0.5, -110, 0.01, 0)
+img.BackgroundTransparency = 1
+img.Image = idLogo
 
-local logoFrame = Instance.new("ImageLabel")
-logoFrame.Name = "LogoFrame"
-logoFrame.Parent = ScreenGui
-logoFrame.AnchorPoint = Vector2.new(0.5, 0)
-logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
-logoFrame.Size = UDim2.new(0, 220, 0, 80)
-logoFrame.BackgroundTransparency = 1
-logoFrame.Image = idLogo
-logoFrame.ScaleType = Enum.ScaleType.Stretch
-
-local stroke = Instance.new("UIStroke", logoFrame)
+local stroke = Instance.new("UIStroke", img)
 stroke.Thickness = 3
-stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+local fps = Instance.new("TextLabel", gui)
+fps.Position = UDim2.new(0.01, 0, 0.01, 0)
+fps.Size = UDim2.new(0, 100, 0, 30)
+fps.BackgroundTransparency = 1
+fps.TextColor3 = Color3.fromRGB(255, 0, 0)
+fps.TextStrokeTransparency = 0
+fps.Font = Enum.Font.GothamBold
+fps.TextSize = 20
+fps.Text = "FPS: ..."
+
+-- ✅ Đổi màu viền liên tục + FPS
+local RunService = game:GetService("RunService")
 spawn(function()
-    local colors = {
-        Color3.fromRGB(255, 0, 0),
-        Color3.fromRGB(148, 0, 211),
-        Color3.fromRGB(255, 255, 0)
-    }
+    local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(148,0,211), Color3.fromRGB(255,255,0)}
     while true do
-        for _, color in ipairs(colors) do
-            stroke.Color = color
+        for _, c in pairs(colors) do
+            stroke.Color = c
             wait(0.5)
         end
     end
 end)
 
-local fpsLabel = Instance.new("TextLabel", ScreenGui)
-fpsLabel.Name = "FPSCounter"
-fpsLabel.Position = UDim2.new(0.01, 0, 0.01, 0)
-fpsLabel.Size = UDim2.new(0, 100, 0, 30)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-fpsLabel.TextStrokeTransparency = 0
-fpsLabel.TextSize = 20
-fpsLabel.Font = Enum.Font.GothamBold
-fpsLabel.Text = "FPS: ..."
-
 spawn(function()
-    local frameCount = 0
-    local lastTime = tick()
+    local frames, last = 0, tick()
     while true do
         RunService.RenderStepped:Wait()
-        frameCount += 1
-        if tick() - lastTime >= 1 then
-            fpsLabel.Text = "FPS: " .. tostring(frameCount)
-            frameCount = 0
-            lastTime = tick()
+        frames += 1
+        if tick() - last >= 1 then
+            fps.Text = "FPS: " .. frames
+            frames = 0
+            last = tick()
         end
     end
 end)
