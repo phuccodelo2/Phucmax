@@ -150,21 +150,20 @@ spawn(function()
                     Text = "❌ Không có trái, đang đổi server...",
                     Duration = 5
                 })
-                local HttpService = game:GetService("HttpService")
-                local TeleportService = game:GetService("TeleportService")
-                local PlaceId = game.PlaceId
-                local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-                local servers = HttpService:JSONDecode(game:HttpGet(url)).data
-                for _, server in pairs(servers) do
-                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                        TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
-                        break
-                    end
-                end
-            end
+                function HopServer()
+    local HttpService = game:GetService("HttpService")
+    local TeleportService = game:GetService("TeleportService")
+    local PlaceId = game.PlaceId
+    local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+    local servers = HttpService:JSONDecode(game:HttpGet(url)).data
+    table.sort(servers, function(a, b) return a.playing < b.playing end)
+    for _, server in pairs(servers) do
+        if server.playing < server.maxPlayers and server.id ~= game.JobId then
+            TeleportService:TeleportToPlaceInstance(PlaceId, server.id, game.Players.LocalPlayer)
+            break
         end
     end
-end)
+                    end
 
 -- ✅ Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
