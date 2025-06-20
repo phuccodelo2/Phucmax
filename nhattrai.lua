@@ -181,3 +181,61 @@ spawn(function()
         end
     end
 end)
+-- UI Logo + FPS
+local idLogo = "rbxassetid://123394707028201"
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "phucmaxnhattraiUI"
+
+-- Logo background
+local logoFrame = Instance.new("ImageLabel")
+logoFrame.Name = "LogoFrame"
+logoFrame.Parent = ScreenGui
+logoFrame.AnchorPoint = Vector2.new(0.5, 0)
+logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
+logoFrame.Size = UDim2.new(0, 220, 0, 80)
+logoFrame.BackgroundTransparency = 1
+logoFrame.Image = idLogo
+logoFrame.ScaleType = Enum.ScaleType.Fit
+
+-- Border hiệu ứng chạy quanh logo
+local stroke = Instance.new("UIStroke", logoFrame)
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 0, 0)
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+-- Chạy màu viền (đỏ → tím → vàng)
+spawn(function()
+    local colors = {
+        Color3.fromRGB(255, 0, 0),       -- đỏ
+        Color3.fromRGB(148, 0, 211),     -- tím
+        Color3.fromRGB(255, 255, 0)      -- vàng
+    }
+    while true do
+        for _, color in ipairs(colors) do
+            stroke.Color = color
+            wait(0.5)
+        end
+    end
+end)
+
+-- FPS Counter
+local fpsLabel = Instance.new("TextLabel", ScreenGui)
+fpsLabel.Name = "FPSCounter"
+fpsLabel.Position = UDim2.new(0.01, 0, 0.01, 0)
+fpsLabel.Size = UDim2.new(0, 100, 0, 30)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+fpsLabel.TextStrokeTransparency = 0
+fpsLabel.TextSize = 20
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: ..."
+
+-- Cập nhật FPS
+spawn(function()
+    local RunService = game:GetService("RunService")
+    while wait(0.2) do
+        local fps = math.floor(1 / RunService.RenderStepped:Wait())
+        fpsLabel.Text = "FPS: " .. tostring(fps)
+    end
+end)
