@@ -1,20 +1,20 @@
 repeat wait() until game:IsLoaded()
 
--- ✅ Auto vào Hải Quân
+-- 🛡️ Auto vào Hải Quân
 pcall(function()
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
 end)
 
--- ✅ Thông báo khởi động
+-- ⚠️ Gửi thông báo khởi động
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
-        Text = "✅ Đã khởi động script thành công!",
+        Text = "✅ Script khởi động thành công!",
         Duration = 6
     })
 end)
 
--- ✅ Danh sách trái cần lưu
+-- 🍎 Danh sách trái cần lưu
 local fruitList = {
     ["Rocket Fruit"] = "Rocket-Rocket", ["Spin Fruit"] = "Spin-Spin", ["Chop Fruit"] = "Chop-Chop",
     ["Spring Fruit"] = "Spring-Spring", ["Bomb Fruit"] = "Bomb-Bomb", ["Smoke Fruit"] = "Smoke-Smoke",
@@ -31,7 +31,7 @@ local fruitList = {
     ["Dragon Fruit"] = "Dragon-Dragon", ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune"
 }
 
--- ✅ ESP hiển thị trái
+-- 🔍 ESP trái
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
@@ -46,7 +46,7 @@ function addESP(obj)
         local label = Instance.new("TextLabel", gui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = obj:IsDescendantOf(workspace) and (obj.Name.." (Fruit?)") or obj.Name
+        label.Text = obj.Name
         label.TextColor3 = Color3.fromRGB(255, 170, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
@@ -54,7 +54,7 @@ function addESP(obj)
     end
 end
 
--- ✅ Tìm trái gần nhất
+-- 🎯 Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
     for _, obj in pairs(workspace:GetChildren()) do
@@ -68,10 +68,10 @@ function getNearestFruit()
     return closest
 end
 
--- ✅ Bay mượt (BodyVelocity, xuyên tường)
+-- ✈️ Bay thẳng đến trái (không giữ độ cao)
 local flying = false
 local fruitTarget = nil
-function flyToFruitSmooth(pos)
+function flyToFruitStraight(pos)
     local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
     if hrp:FindFirstChild("FruitFly") then hrp.FruitFly:Destroy() end
@@ -84,7 +84,7 @@ function flyToFruitSmooth(pos)
     flying = true
     spawn(function()
         while flying and fruitTarget and fruitTarget:FindFirstChild("Handle") do
-            local dir = (fruitTarget.Handle.Position + Vector3.new(0, 15, 0)) - hrp.Position
+            local dir = (fruitTarget.Handle.Position - hrp.Position)
             if dir.Magnitude < 5 then flying = false break end
             bv.Velocity = dir.Unit * 300
             wait()
@@ -93,19 +93,19 @@ function flyToFruitSmooth(pos)
     end)
 end
 
--- ✅ Quét liên tục + bay
+-- ♻️ Vòng lặp bay + ESP
 spawn(function()
     while wait(0.5) do
         for _, obj in pairs(workspace:GetChildren()) do addESP(obj) end
         local fruit = getNearestFruit()
         if fruit and fruit:FindFirstChild("Handle") then
             fruitTarget = fruit
-            flyToFruitSmooth(fruit.Handle.Position)
+            flyToFruitStraight(fruit.Handle.Position)
         end
     end
 end)
 
--- ✅ Lưu trái vào kho
+-- 💾 Tự lưu trái
 spawn(function()
     while wait(1) do
         pcall(function()
@@ -120,7 +120,7 @@ spawn(function()
     end
 end)
 
--- ✅ Auto hop server khi không có trái
+-- 🔁 Auto hop server
 function HopServer()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
@@ -135,10 +135,9 @@ function HopServer()
     end
 end
 
--- ✅ Nếu đứng yên hoặc không trái thì hop
+-- 🕒 Hop nếu đứng yên hoặc không có trái
 spawn(function()
-    local lastPos = nil
-    local idleTime = 0
+    local lastPos, idleTime = nil, 0
     while wait(1) do
         local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
@@ -155,53 +154,76 @@ spawn(function()
     end
 end)
 
--- ✅ Logo + FPS
+-- 🧠 Giao diện menu + Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "phucmaxnhattraiUI"
 
-local img = Instance.new("ImageLabel", gui)
-img.Name = "Logo"
-img.Size = UDim2.new(0, 220, 0, 80)
-img.Position = UDim2.new(0.5, -110, 0.01, 0)
-img.BackgroundTransparency = 1
-img.Image = idLogo
+-- Menu chính
+local mainFrame = Instance.new("Frame", gui)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.Size = UDim2.new(0, 300, 0, 200)
+mainFrame.Position = UDim2.new(0, 20, 0.5, -100)
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundTransparency = 0.1
 
-local stroke = Instance.new("UIStroke", img)
+local uicorner = Instance.new("UICorner", mainFrame)
+uicorner.CornerRadius = UDim.new(0, 12)
+
+-- Logo
+local logo = Instance.new("ImageLabel", mainFrame)
+logo.Size = UDim2.new(0, 60, 0, 60)
+logo.Position = UDim2.new(0.5, -30, 0, 10)
+logo.BackgroundTransparency = 1
+logo.Image = idLogo
+
+-- Viền logo chạy màu
+local stroke = Instance.new("UIStroke", logo)
 stroke.Thickness = 3
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-local fps = Instance.new("TextLabel", gui)
-fps.Position = UDim2.new(0.01, 0, 0.01, 0)
-fps.Size = UDim2.new(0, 100, 0, 30)
-fps.BackgroundTransparency = 1
-fps.TextColor3 = Color3.fromRGB(255, 0, 0)
-fps.TextStrokeTransparency = 0
-fps.Font = Enum.Font.GothamBold
-fps.TextSize = 20
-fps.Text = "FPS: ..."
-
--- ✅ Đổi màu viền liên tục + FPS
-local RunService = game:GetService("RunService")
 spawn(function()
-    local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(148,0,211), Color3.fromRGB(255,255,0)}
+    local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(148,0,211), Color3.fromRGB(0,255,0)}
     while true do
         for _, c in pairs(colors) do
             stroke.Color = c
-            wait(0.5)
+            wait(0.3)
         end
     end
 end)
 
+-- Nút đóng
+local closeBtn = Instance.new("TextButton", mainFrame)
+closeBtn.Text = "✖"
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeBtn.TextColor3 = Color3.new(1,1,1)
+closeBtn.MouseButton1Click:Connect(function()
+    gui:Destroy()
+end)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1,0)
+
+-- FPS
+local fps = Instance.new("TextLabel", mainFrame)
+fps.Position = UDim2.new(0, 10, 1, -30)
+fps.Size = UDim2.new(0, 100, 0, 25)
+fps.TextColor3 = Color3.fromRGB(255, 255, 255)
+fps.BackgroundTransparency = 1
+fps.Font = Enum.Font.GothamBold
+fps.TextSize = 16
+fps.Text = "FPS: ..."
+
 spawn(function()
-    local frames, last = 0, tick()
-    while true do
-        RunService.RenderStepped:Wait()
-        frames += 1
+    local rs = game:GetService("RunService")
+    local count, last = 0, tick()
+    rs.RenderStepped:Connect(function()
+        count += 1
         if tick() - last >= 1 then
-            fps.Text = "FPS: " .. frames
-            frames = 0
+            fps.Text = "FPS: " .. count
+            count = 0
             last = tick()
         end
-    end
+    end)
 end)
