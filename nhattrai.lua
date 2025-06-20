@@ -154,7 +154,7 @@ function NotifyFruitStatus()
         if has then
             game.StarterGui:SetCore("SendNotification", {
                 Title = "phucmaxnhattrai",
-                Text = "🍈Trái đã xuất hiện!",
+                Text = "🍈 Trái đã xuất hiện!",
                 Duration = 5
             })
         else
@@ -180,4 +180,4 @@ spawn(function()
             HopServer()
         end
     end
-end)end)
+end)
