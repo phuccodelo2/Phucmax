@@ -150,7 +150,7 @@ spawn(function()
                     Text = "❌ Không có trái, đang đổi server...",
                     Duration = 5
                 })
-                function HopServer()
+                
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
