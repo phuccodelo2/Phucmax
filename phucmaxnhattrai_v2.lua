@@ -131,26 +131,7 @@ spawn(function()
 end)
 
 -- ✅ Auto hop server
-spawn(function()
-    local lastPos = nil
-    local idleTime = 0
-    while wait(1) do
-        local root = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            if lastPos and (root.Position - lastPos).Magnitude < 1 then
-                idleTime += 1
-            else
-                idleTime = 0
-            end
-            lastPos = root.Position
-
-            if idleTime >= 5 or not getNearestFruit() then
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "phucmaxnhattrai",
-                    Text = "❌ Không có trái, đang đổi server...",
-                    Duration = 5
-                })
-                
+function HopServer()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
     local PlaceId = game.PlaceId
@@ -163,17 +144,10 @@ spawn(function()
             break
         end
     end
-                    end
+end
 
--- ✅ Logo + FPS
-local idLogo = "rbxassetid://123394707028201"
-local RunService = game:GetService("RunService")
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "phucmaxnhattraiUI"
 
-local logoFrame = Instance.new("ImageLabel")
-logoFrame.Name = "LogoFrame"
-logoFrame.Parent = ScreenGui
+ogoFrame.Parent = ScreenGui
 logoFrame.AnchorPoint = Vector2.new(0.5, 0)
 logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
 logoFrame.Size = UDim2.new(0, 220, 0, 80)
