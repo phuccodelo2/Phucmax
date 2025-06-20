@@ -154,76 +154,54 @@ spawn(function()
     end
 end)
 
--- 🧠 Giao diện menu + Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "phucmaxnhattraiUI"
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "phucmaxnhattraiUI"
 
--- Menu chính
-local mainFrame = Instance.new("Frame", gui)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.Size = UDim2.new(0, 300, 0, 200)
-mainFrame.Position = UDim2.new(0, 20, 0.5, -100)
-mainFrame.Active = true
-mainFrame.Draggable = true
-mainFrame.BorderSizePixel = 0
-mainFrame.BackgroundTransparency = 0.1
+local logoFrame = Instance.new("ImageLabel")
+logoFrame.Name = "LogoFrame"
+logoFrame.Parent = ScreenGui
+logoFrame.AnchorPoint = Vector2.new(0.5, 0)
+logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
+logoFrame.Size = UDim2.new(0, 220, 0, 80)
+logoFrame.BackgroundTransparency = 1
+logoFrame.Image = idLogo
+logoFrame.ScaleType = Enum.ScaleType.Stretch
 
-local uicorner = Instance.new("UICorner", mainFrame)
-uicorner.CornerRadius = UDim.new(0, 12)
-
--- Logo
-local logo = Instance.new("ImageLabel", mainFrame)
-logo.Size = UDim2.new(0, 60, 0, 60)
-logo.Position = UDim2.new(0.5, -30, 0, 10)
-logo.BackgroundTransparency = 1
-logo.Image = idLogo
-
--- Viền logo chạy màu
-local stroke = Instance.new("UIStroke", logo)
+local stroke = Instance.new("UIStroke", logoFrame)
 stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 0, 0)
 stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
 spawn(function()
-    local colors = {Color3.fromRGB(255,0,0), Color3.fromRGB(148,0,211), Color3.fromRGB(0,255,0)}
+    local colors = {
+        Color3.fromRGB(255, 0, 0),
+        Color3.fromRGB(148, 0, 211),
+        Color3.fromRGB(255, 255, 0)
+    }
     while true do
-        for _, c in pairs(colors) do
-            stroke.Color = c
-            wait(0.3)
+        for _, color in ipairs(colors) do
+            stroke.Color = color
+            wait(0.5)
         end
     end
 end)
 
--- Nút đóng
-local closeBtn = Instance.new("TextButton", mainFrame)
-closeBtn.Text = "✖"
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-closeBtn.TextColor3 = Color3.new(1,1,1)
-closeBtn.MouseButton1Click:Connect(function()
-    gui:Destroy()
-end)
-Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(1,0)
-
--- FPS
-local fps = Instance.new("TextLabel", mainFrame)
-fps.Position = UDim2.new(0, 10, 1, -30)
-fps.Size = UDim2.new(0, 100, 0, 25)
-fps.TextColor3 = Color3.fromRGB(255, 255, 255)
-fps.BackgroundTransparency = 1
-fps.Font = Enum.Font.GothamBold
-fps.TextSize = 16
-fps.Text = "FPS: ..."
+local fpsLabel = Instance.new("TextLabel", ScreenGui)
+fpsLabel.Name = "FPSCounter"
+fpsLabel.Position = UDim2.new(0.01, 0, 0.01, 0)
+fpsLabel.Size = UDim2.new(0, 100, 0, 30)
+fpsLabel.BackgroundTransparency = 1
+fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+fpsLabel.TextStrokeTransparency = 0
+fpsLabel.TextSize = 20
+fpsLabel.Font = Enum.Font.GothamBold
+fpsLabel.Text = "FPS: ..."
 
 spawn(function()
-    local rs = game:GetService("RunService")
-    local count, last = 0, tick()
-    rs.RenderStepped:Connect(function()
-        count += 1
-        if tick() - last >= 1 then
-            fps.Text = "FPS: " .. count
-            count = 0
-            last = tick()
-        end
-    end)
+    local RunService = game:GetService("RunService")
+    while wait(0.2) do
+        local fps = math.floor(1 / RunService.RenderStepped:Wait())
+        fpsLabel.Text = "FPS: " .. tostring(fps)
+    end
 end)
