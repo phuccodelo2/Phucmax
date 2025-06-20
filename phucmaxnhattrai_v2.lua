@@ -9,12 +9,12 @@ end)
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
-        Text = "lần đầu tiên mình làm nếu có lỗi gì báo ad nha",
+        Text = "✅ Lần đầu mình làm, nếu lỗi báo ad nha",
         Duration = 6
     })
 end)
 
--- ✅ Danh sách trái cần lưu vào kho
+-- ✅ Danh sách trái lưu
 local fruitList = {
     ["Rocket Fruit"] = "Rocket-Rocket", ["Spin Fruit"] = "Spin-Spin", ["Chop Fruit"] = "Chop-Chop",
     ["Spring Fruit"] = "Spring-Spring", ["Bomb Fruit"] = "Bomb-Bomb", ["Smoke Fruit"] = "Smoke-Smoke",
@@ -31,7 +31,7 @@ local fruitList = {
     ["Dragon Fruit"] = "Dragon-Dragon", ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune"
 }
 
--- ✅ ESP trái
+-- ✅ ESP Trái
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
@@ -54,6 +54,7 @@ function addESP(obj)
     end
 end
 
+-- ✅ Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
     for _, obj in pairs(game.Workspace:GetChildren()) do
@@ -67,7 +68,40 @@ function getNearestFruit()
     return closest
 end
 
--- ✅ Bay đến trái và ESP liên tục
+-- ✅ Bay mượt đến trái
+local flying = false
+function flyToFruitSmooth(fruitPos)
+    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    if hrp:FindFirstChild("FruitFly") then
+        hrp.FruitFly:Destroy()
+    end
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Name = "FruitFly"
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bv.Velocity = Vector3.zero
+    bv.P = 300
+    bv.Parent = hrp
+
+    flying = true
+    spawn(function()
+        while flying and fruitTarget and fruitTarget:FindFirstChild("Handle") do
+            local dir = (fruitTarget.Handle.Position + Vector3.new(0, 20, 0) - hrp.Position)
+            local dist = dir.Magnitude
+            if dist < 5 then
+                flying = false
+                break
+            end
+            bv.Velocity = dir.Unit * 300
+            wait()
+        end
+        if bv and bv.Parent then bv:Destroy() end
+    end)
+end
+
+-- ✅ Bay + ESP liên tục
 spawn(function()
     while wait(0.5) do
         for _, obj in pairs(game.Workspace:GetChildren()) do
@@ -75,11 +109,8 @@ spawn(function()
         end
         local fruit = getNearestFruit()
         if fruit and fruit:FindFirstChild("Handle") then
-            local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                hrp.Velocity = Vector3.zero
-                hrp.CFrame = CFrame.new(fruit.Handle.Position + Vector3.new(0, 20, 0))
-            end
+            fruitTarget = fruit
+            flyToFruitSmooth(fruit.Handle.Position)
         end
     end
 end)
@@ -99,7 +130,7 @@ spawn(function()
     end
 end)
 
--- ✅ Auto hop server nếu không có trái hoặc đứng yên
+-- ✅ Auto hop server
 spawn(function()
     local lastPos = nil
     local idleTime = 0
@@ -116,7 +147,7 @@ spawn(function()
             if idleTime >= 5 or not getNearestFruit() then
                 game.StarterGui:SetCore("SendNotification", {
                     Title = "phucmaxnhattrai",
-                    Text = "❌ trái đang đổi sever ",
+                    Text = "❌ Không có trái, đang đổi server...",
                     Duration = 5
                 })
                 local HttpService = game:GetService("HttpService")
