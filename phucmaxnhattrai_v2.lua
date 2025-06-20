@@ -70,6 +70,8 @@ end
 
 -- ✅ Bay mượt đến trái
 local flying = false
+local fruitTarget = nil
+
 function flyToFruitSmooth(fruitPos)
     local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
@@ -146,8 +148,37 @@ function HopServer()
     end
 end
 
+-- ✅ Kiểm tra đứng yên hoặc không có trái thì hop
+spawn(function()
+    local lastPos = nil
+    local idleTime = 0
+    while wait(1) do
+        local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            if lastPos and (hrp.Position - lastPos).Magnitude < 1 then
+                idleTime += 1
+            else
+                idleTime = 0
+            end
+            lastPos = hrp.Position
 
-ogoFrame.Parent = ScreenGui
+            if idleTime >= 5 or not getNearestFruit() then
+                HopServer()
+            end
+        end
+    end
+end)
+
+-- ✅ Logo + FPS
+local idLogo = "rbxassetid://123394707028201"
+local RunService = game:GetService("RunService")
+
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "phucmaxnhattraiUI"
+
+local logoFrame = Instance.new("ImageLabel")
+logoFrame.Name = "LogoFrame"
+logoFrame.Parent = ScreenGui
 logoFrame.AnchorPoint = Vector2.new(0.5, 0)
 logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
 logoFrame.Size = UDim2.new(0, 220, 0, 80)
