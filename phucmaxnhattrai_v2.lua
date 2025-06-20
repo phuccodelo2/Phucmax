@@ -1,12 +1,11 @@
-
 repeat wait() until game:IsLoaded()
 
--- Vào Marines
+-- ✅ Auto vào Hải Quân
 pcall(function()
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
 end)
 
--- Thông báo khởi động
+-- ✅ Thông báo khởi động
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
@@ -15,7 +14,7 @@ pcall(function()
     })
 end)
 
--- Danh sách fruit cần lưu
+-- ✅ Danh sách trái lưu kho
 local fruitList = {
     ["Bomb Fruit"] = "Bomb-Bomb", ["Spike Fruit"] = "Spike-Spike", ["Chop Fruit"] = "Chop-Chop",
     ["Spring Fruit"] = "Spring-Spring", ["Kilo Fruit"] = "Rocket-Rocket", ["Smoke Fruit"] = "Smoke-Smoke",
@@ -28,10 +27,12 @@ local fruitList = {
     ["Rumble Fruit"] = "Rumble-Rumble", ["Pain Fruit"] = "Pain-Pain", ["Gravity Fruit"] = "Gravity-Gravity",
     ["Dough Fruit"] = "Dough-Dough", ["Shadow Fruit"] = "Shadow-Shadow", ["Venom Fruit"] = "Venom-Venom",
     ["Control Fruit"] = "Control-Control", ["Spirit Fruit"] = "Soul-Soul", ["Dragon Fruit"] = "Dragon-Dragon",
-    ["Leopard Fruit"] = "Leopard-Leopard"
+    ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune", ["T-Rex Fruit"] = "T-Rex", 
+    ["Mammoth Fruit"] = "Mammoth", ["Blizzard Fruit"] = "Blizzard-Blizzard", ["Sound Fruit"] = "Sound-Sound", 
+    ["Eagle Fruit"] = "Eagle-Eagle", ["Creation Fruit"] = "Creation-Creation"
 }
 
--- ESP
+-- ✅ Tạo ESP trái
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
@@ -40,20 +41,21 @@ function addESP(obj)
         local gui = Instance.new("BillboardGui", espFolder)
         gui.Name = "ESP_"..obj.Name
         gui.Adornee = obj.Handle
-        gui.Size = UDim2.new(0, 100, 0, 40)
+        gui.Size = UDim2.new(0, 120, 0, 40)
         gui.AlwaysOnTop = true
 
         local label = Instance.new("TextLabel", gui)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
-        label.Text = obj.Name
+        label.Text = obj.Name .. " (" .. math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Handle.Position).Magnitude) .. "m)"
         label.TextColor3 = Color3.fromRGB(255, 85, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
-        label.TextSize = 16
+        label.TextScaled = true
     end
 end
 
+-- ✅ Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
     for _, obj in pairs(game.Workspace:GetChildren()) do
@@ -67,7 +69,7 @@ function getNearestFruit()
     return closest
 end
 
--- ESP & auto bay liên tục
+-- ✅ Auto ESP + Bay tới
 spawn(function()
     while wait(0.5) do
         for _, obj in pairs(game.Workspace:GetChildren()) do
@@ -78,14 +80,14 @@ spawn(function()
         if fruit and fruit:FindFirstChild("Handle") then
             local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                hrp.CFrame = CFrame.new(fruit.Handle.Position + Vector3.new(0, 20, 0))
+                hrp.Velocity = Vector3.zero
+                hrp.CFrame = CFrame.new(fruit.Handle.Position + Vector3.new(0, 15, 0))
             end
         end
     end
 end)
 
--- Lưu trái liên tục
+-- ✅ Lưu trái vào kho
 spawn(function()
     while wait(1) do
         pcall(function()
@@ -100,7 +102,7 @@ spawn(function()
     end
 end)
 
--- Auto hop server khi đứng yên hoặc không có trái
+-- ✅ Hop server nếu đứng yên hoặc không có trái
 spawn(function()
     local lastPos = nil
     local idleTime = 0
@@ -136,7 +138,7 @@ spawn(function()
     end
 end)
 
--- UI Logo + FPS
+-- ✅ UI: Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
 local RunService = game:GetService("RunService")
 
