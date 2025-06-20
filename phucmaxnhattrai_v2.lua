@@ -5,7 +5,7 @@ pcall(function()
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
 end)
 
--- ⚠️ Gửi thông báo khởi động
+-- ⚠️ Thông báo
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
@@ -31,7 +31,7 @@ local fruitList = {
     ["Dragon Fruit"] = "Dragon-Dragon", ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune"
 }
 
--- 🔍 ESP trái
+-- 🔍 ESP
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
@@ -54,7 +54,6 @@ function addESP(obj)
     end
 end
 
--- 🎯 Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
     for _, obj in pairs(workspace:GetChildren()) do
@@ -68,10 +67,51 @@ function getNearestFruit()
     return closest
 end
 
+-- ✈️ Bay xuyên vật thể + reset trạng thái sau mỗi lượt
+local flying = false
+local fruitTarget = nil
 
--- 💾 Tự lưu trái
+function flyToFruit(pos)
+    local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    if hrp:FindFirstChild("FruitFly") then hrp.FruitFly:Destroy() end
+
+    local bv = Instance.new("BodyVelocity", hrp)
+    bv.Name = "FruitFly"
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bv.Velocity = Vector3.zero
+
+    flying = true
+    spawn(function()
+        while flying and fruitTarget and fruitTarget:FindFirstChild("Handle") do
+            local dir = (fruitTarget.Handle.Position - hrp.Position)
+            if dir.Magnitude < 5 then flying = false break end
+            bv.Velocity = dir.Unit * 300
+            wait()
+        end
+        if bv then bv:Destroy() end
+    end)
+end
+
+-- 🔁 Quét trái + reset trạng thái
 spawn(function()
     while wait(1) do
+        pcall(function()
+            for _, obj in pairs(workspace:GetChildren()) do addESP(obj) end
+            fruitTarget = getNearestFruit()
+            if fruitTarget and fruitTarget:FindFirstChild("Handle") then
+                flyToFruit(fruitTarget.Handle.Position)
+                wait(5)
+                flying = false
+                fruitTarget = nil
+            end
+        end)
+    end
+end)
+
+-- 💾 Lưu trái + reset trạng thái
+spawn(function()
+    while wait(3) do
         pcall(function()
             local plr = game.Players.LocalPlayer
             for name, id in pairs(fruitList) do
@@ -84,7 +124,7 @@ spawn(function()
     end
 end)
 
--- 🔁 Auto hop server
+-- 🔁 Auto hop + reset idle
 function HopServer()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
@@ -99,7 +139,6 @@ function HopServer()
     end
 end
 
--- 🕒 Hop nếu đứng yên hoặc không có trái
 spawn(function()
     local lastPos, idleTime = nil, 0
     while wait(1) do
@@ -113,59 +152,10 @@ spawn(function()
             lastPos = hrp.Position
             if idleTime >= 5 or not getNearestFruit() then
                 HopServer()
+                idleTime = 0
+                fruitTarget = nil
+                flying = false
             end
         end
-    end
-end)
-
-local idLogo = "rbxassetid://123394707028201"
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "phucmaxnhattraiUI"
-
-local logoFrame = Instance.new("ImageLabel")
-logoFrame.Name = "LogoFrame"
-logoFrame.Parent = ScreenGui
-logoFrame.AnchorPoint = Vector2.new(0.5, 0)
-logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
-logoFrame.Size = UDim2.new(0, 220, 0, 80)
-logoFrame.BackgroundTransparency = 1
-logoFrame.Image = idLogo
-logoFrame.ScaleType = Enum.ScaleType.Stretch
-
-local stroke = Instance.new("UIStroke", logoFrame)
-stroke.Thickness = 3
-stroke.Color = Color3.fromRGB(255, 0, 0)
-stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-spawn(function()
-    local colors = {
-        Color3.fromRGB(255, 0, 0),
-        Color3.fromRGB(148, 0, 211),
-        Color3.fromRGB(255, 255, 0)
-    }
-    while true do
-        for _, color in ipairs(colors) do
-            stroke.Color = color
-            wait(0.5)
-        end
-    end
-end)
-
-local fpsLabel = Instance.new("TextLabel", ScreenGui)
-fpsLabel.Name = "FPSCounter"
-fpsLabel.Position = UDim2.new(0.01, 0, 0.01, 0)
-fpsLabel.Size = UDim2.new(0, 100, 0, 30)
-fpsLabel.BackgroundTransparency = 1
-fpsLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
-fpsLabel.TextStrokeTransparency = 0
-fpsLabel.TextSize = 20
-fpsLabel.Font = Enum.Font.GothamBold
-fpsLabel.Text = "FPS: ..."
-
-spawn(function()
-    local RunService = game:GetService("RunService")
-    while wait(0.2) do
-        local fps = math.floor(1 / RunService.RenderStepped:Wait())
-        fpsLabel.Text = "FPS: " .. tostring(fps)
     end
 end)
