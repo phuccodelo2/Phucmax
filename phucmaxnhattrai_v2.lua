@@ -14,30 +14,29 @@ pcall(function()
     })
 end)
 
--- ✅ Danh sách trái lưu kho
+-- ✅ Danh sách trái cần lưu vào kho
 local fruitList = {
-    ["Bomb Fruit"] = "Bomb-Bomb", ["Spike Fruit"] = "Spike-Spike", ["Chop Fruit"] = "Chop-Chop",
-    ["Spring Fruit"] = "Spring-Spring", ["Kilo Fruit"] = "Rocket-Rocket", ["Smoke Fruit"] = "Smoke-Smoke",
-    ["Spin Fruit"] = "Spin-Spin", ["Flame Fruit"] = "Flame-Flame", ["Falcon Fruit"] = "Falcon",
+    ["Rocket Fruit"] = "Rocket-Rocket", ["Spin Fruit"] = "Spin-Spin", ["Chop Fruit"] = "Chop-Chop",
+    ["Spring Fruit"] = "Spring-Spring", ["Bomb Fruit"] = "Bomb-Bomb", ["Smoke Fruit"] = "Smoke-Smoke",
+    ["Spike Fruit"] = "Spike-Spike", ["Flame Fruit"] = "Flame-Flame", ["Eagle Fruit"] = "Eagle-Eagle",
     ["Ice Fruit"] = "Ice-Ice", ["Sand Fruit"] = "Sand-Sand", ["Dark Fruit"] = "Dark-Dark",
-    ["Revive Fruit"] = "Ghost-Ghost", ["Diamond Fruit"] = "Diamond-Diamond", ["Light Fruit"] = "Light-Light",
-    ["Love Fruit"] = "Love-Love", ["Rubber Fruit"] = "Rubber-Rubber", ["Barrier Fruit"] = "Barrier-Barrier",
-    ["Magma Fruit"] = "Magma-Magma", ["Portal Fruit"] = "Door-Door", ["Quake Fruit"] = "Quake-Quake",
-    ["Buddha Fruit"] = "Buddha", ["Spider Fruit"] = "Spider-Spider", ["Phoenix Fruit"] = "Phoenix",
-    ["Rumble Fruit"] = "Rumble-Rumble", ["Pain Fruit"] = "Pain-Pain", ["Gravity Fruit"] = "Gravity-Gravity",
-    ["Dough Fruit"] = "Dough-Dough", ["Shadow Fruit"] = "Shadow-Shadow", ["Venom Fruit"] = "Venom-Venom",
-    ["Control Fruit"] = "Control-Control", ["Spirit Fruit"] = "Soul-Soul", ["Dragon Fruit"] = "Dragon-Dragon",
-    ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune", ["T-Rex Fruit"] = "T-Rex", 
-    ["Mammoth Fruit"] = "Mammoth", ["Blizzard Fruit"] = "Blizzard-Blizzard", ["Sound Fruit"] = "Sound-Sound", 
-    ["Eagle Fruit"] = "Eagle-Eagle", ["Creation Fruit"] = "Creation-Creation"
+    ["Diamond Fruit"] = "Diamond-Diamond", ["Light Fruit"] = "Light-Light", ["Rubber Fruit"] = "Rubber-Rubber",
+    ["Creation Fruit"] = "Creation-Creation", ["Ghost Fruit"] = "Ghost-Ghost", ["Magma Fruit"] = "Magma-Magma",
+    ["Quake Fruit"] = "Quake-Quake", ["Buddha Fruit"] = "Buddha", ["Love Fruit"] = "Love-Love",
+    ["Spider Fruit"] = "Spider-Spider", ["Sound Fruit"] = "Sound-Sound", ["Phoenix Fruit"] = "Phoenix",
+    ["Portal Fruit"] = "Door-Door", ["Rumble Fruit"] = "Rumble-Rumble", ["Pain Fruit"] = "Pain-Pain",
+    ["Blizzard Fruit"] = "Blizzard-Blizzard", ["Gravity Fruit"] = "Gravity-Gravity", ["Mammoth Fruit"] = "Mammoth",
+    ["T-Rex Fruit"] = "T-Rex", ["Dough Fruit"] = "Dough-Dough", ["Shadow Fruit"] = "Shadow-Shadow",
+    ["Venom Fruit"] = "Venom-Venom", ["Control Fruit"] = "Control-Control", ["Spirit Fruit"] = "Soul-Soul",
+    ["Dragon Fruit"] = "Dragon-Dragon", ["Leopard Fruit"] = "Leopard-Leopard", ["Kitsune Fruit"] = "Kitsune-Kitsune"
 }
 
--- ✅ Tạo ESP trái
+-- ✅ ESP trái
 local espFolder = Instance.new("Folder", game.CoreGui)
 espFolder.Name = "FruitESP"
 
 function addESP(obj)
-    if obj:IsA("Tool") and obj:FindFirstChild("Handle") and string.find(obj.Name:lower(), "fruit") and not espFolder:FindFirstChild("ESP_"..obj.Name) then
+    if obj:IsA("Tool") and obj:FindFirstChild("Handle") and obj.Name:lower():find("fruit") and not espFolder:FindFirstChild("ESP_"..obj.Name) then
         local gui = Instance.new("BillboardGui", espFolder)
         gui.Name = "ESP_"..obj.Name
         gui.Adornee = obj.Handle
@@ -48,18 +47,17 @@ function addESP(obj)
         label.Size = UDim2.new(1, 0, 1, 0)
         label.BackgroundTransparency = 1
         label.Text = obj.Name .. " (" .. math.floor((game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Handle.Position).Magnitude) .. "m)"
-        label.TextColor3 = Color3.fromRGB(255, 85, 0)
+        label.TextColor3 = Color3.fromRGB(255, 170, 0)
         label.TextStrokeTransparency = 0
         label.Font = Enum.Font.GothamBold
         label.TextScaled = true
     end
 end
 
--- ✅ Tìm trái gần nhất
 function getNearestFruit()
     local closest, dist = nil, math.huge
     for _, obj in pairs(game.Workspace:GetChildren()) do
-        if obj:IsA("Tool") and obj:FindFirstChild("Handle") and string.find(obj.Name:lower(), "fruit") then
+        if obj:IsA("Tool") and obj:FindFirstChild("Handle") and obj.Name:lower():find("fruit") then
             local mag = (game.Players.LocalPlayer.Character.HumanoidRootPart.Position - obj.Handle.Position).Magnitude
             if mag < dist then
                 closest, dist = obj, mag
@@ -69,25 +67,24 @@ function getNearestFruit()
     return closest
 end
 
--- ✅ Auto ESP + Bay tới
+-- ✅ Bay đến trái và ESP liên tục
 spawn(function()
     while wait(0.5) do
         for _, obj in pairs(game.Workspace:GetChildren()) do
             addESP(obj)
         end
-
         local fruit = getNearestFruit()
         if fruit and fruit:FindFirstChild("Handle") then
             local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
                 hrp.Velocity = Vector3.zero
-                hrp.CFrame = CFrame.new(fruit.Handle.Position + Vector3.new(0, 15, 0))
+                hrp.CFrame = CFrame.new(fruit.Handle.Position + Vector3.new(0, 20, 0))
             end
         end
     end
 end)
 
--- ✅ Lưu trái vào kho
+-- ✅ Auto lưu vào kho
 spawn(function()
     while wait(1) do
         pcall(function()
@@ -102,7 +99,7 @@ spawn(function()
     end
 end)
 
--- ✅ Hop server nếu đứng yên hoặc không có trái
+-- ✅ Auto hop server nếu không có trái hoặc đứng yên
 spawn(function()
     local lastPos = nil
     local idleTime = 0
@@ -138,10 +135,9 @@ spawn(function()
     end
 end)
 
--- ✅ UI: Logo + FPS
+-- ✅ Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
 local RunService = game:GetService("RunService")
-
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 ScreenGui.Name = "phucmaxnhattraiUI"
 
