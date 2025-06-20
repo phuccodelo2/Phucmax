@@ -5,16 +5,16 @@ pcall(function()
     game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("SetTeam", "Marines")
 end)
 
--- Thông báo khởi động
+-- Thông báo chạy thành công
 pcall(function()
     game.StarterGui:SetCore("SendNotification", {
         Title = "phucmaxnhattrai",
-        Text = "✅ Đã khởi động script thành công!",
+        Text = "✅ Script chạy thành công!",
         Duration = 6
     })
 end)
 
--- Danh sách fruit cần lưu
+-- Danh sách fruit để lưu
 local fruitList = {
     ["Bomb Fruit"] = "Bomb-Bomb", ["Spike Fruit"] = "Spike-Spike", ["Chop Fruit"] = "Chop-Chop",
     ["Spring Fruit"] = "Spring-Spring", ["Kilo Fruit"] = "Rocket-Rocket", ["Smoke Fruit"] = "Smoke-Smoke",
@@ -62,7 +62,7 @@ for _, obj in pairs(game.Workspace:GetChildren()) do
     addESP(obj)
 end
 
--- Lưu trái
+-- Tự lưu trái
 spawn(function()
     while wait(2) do
         pcall(function()
@@ -77,25 +77,48 @@ spawn(function()
     end
 end)
 
--- Nhặt trái
+-- Giữ bay trên không
+local BodyGyro = Instance.new("BodyGyro")
+local BodyVelocity = Instance.new("BodyVelocity")
+local hrp = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+BodyGyro.P = 9e4
+BodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+BodyGyro.cframe = hrp.CFrame
+BodyGyro.Parent = hrp
+BodyVelocity.Velocity = Vector3.new(0, 0, 0)
+BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+BodyVelocity.Parent = hrp
+
+-- Bay đến trái (Tween)
+local TweenService = game:GetService("TweenService")
+function FlyToFruit(target)
+    if not target then return end
+    local goal = target.Position + Vector3.new(0, 5, 0)
+    local dist = (hrp.Position - goal).Magnitude
+    local time = dist / 300
+
+    local tween = TweenService:Create(hrp, TweenInfo.new(time, Enum.EasingStyle.Linear), {CFrame = CFrame.new(goal)})
+    tween:Play()
+    tween.Completed:Wait()
+
+    firetouchinterest(hrp, target, 0)
+    wait(0.1)
+    firetouchinterest(hrp, target, 1)
+end
+
+-- Auto bay nhặt trái
 spawn(function()
     while wait(1) do
         for _, v in pairs(game.Workspace:GetChildren()) do
             if v:IsA("Tool") and v:FindFirstChild("Handle") and string.find(v.Name:lower(), "fruit") then
-                local hrp = game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    hrp.CFrame = v.Handle.CFrame + Vector3.new(0, 4, 0)
-                    wait(0.3)
-                    firetouchinterest(hrp, v.Handle, 0)
-                    wait(0.1)
-                    firetouchinterest(hrp, v.Handle, 1)
-                end
+                FlyToFruit(v.Handle)
+                wait(0.5)
             end
         end
     end
 end)
 
--- Kiểm tra trái
+-- Check có trái không
 function HasFruit()
     for _, v in pairs(game.Workspace:GetChildren()) do
         if v:IsA("Tool") and v:FindFirstChild("Handle") and string.find(v.Name:lower(), "fruit") then
@@ -105,7 +128,7 @@ function HasFruit()
     return false
 end
 
--- Auto hop server
+-- Hop server
 function HopServer()
     local HttpService = game:GetService("HttpService")
     local TeleportService = game:GetService("TeleportService")
@@ -131,27 +154,25 @@ function NotifyFruitStatus()
         if has then
             game.StarterGui:SetCore("SendNotification", {
                 Title = "phucmaxnhattrai",
-                Text = "🎯 Trái xuất hiện trong map!",
+                Text = "🍈Trái đã xuất hiện!",
                 Duration = 5
             })
         else
             game.StarterGui:SetCore("SendNotification", {
                 Title = "phucmaxnhattrai",
-                Text = "🔁 Không có trái. Đang tìm server mới...",
+                Text = "🔁 Không còn trái. Đổi server...",
                 Duration = 5
             })
         end
     end
 end
 
--- Cập nhật trạng thái
 spawn(function()
     while wait(5) do
         NotifyFruitStatus()
     end
 end)
 
--- Auto đổi server khi không còn trái
 spawn(function()
     while wait(15) do
         if not HasFruit() then
@@ -159,4 +180,4 @@ spawn(function()
             HopServer()
         end
     end
-end)
+end)end)
