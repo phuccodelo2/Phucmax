@@ -182,6 +182,7 @@ spawn(function()
     end
 end)
 -- UI Logo + FPS
+-- UI Logo + FPS
 local idLogo = "rbxassetid://123394707028201"
 
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
@@ -196,7 +197,7 @@ logoFrame.Position = UDim2.new(0.5, 0, 0.01, 0)
 logoFrame.Size = UDim2.new(0, 220, 0, 80)
 logoFrame.BackgroundTransparency = 1
 logoFrame.Image = idLogo
-logoFrame.ScaleType = Enum.ScaleType.Fit
+logoFrame.ScaleType = Enum.ScaleType.Stretch -- ✅ Sửa tại đây
 
 -- Border hiệu ứng chạy quanh logo
 local stroke = Instance.new("UIStroke", logoFrame)
