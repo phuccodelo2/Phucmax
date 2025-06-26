@@ -31,7 +31,7 @@ end)
 
 -- ⚙️ Tab names và frame chứa
 local tabNames = {
-	"THÔNG TIN", "SCRIPT FARM", "SCRIPT HOP", "SCRIPT BOUNTY",
+	"THÔNG TIN", "SCRIPT FARM", "SCRIPT HOP", 
 	"SCRIPT KAITUN", "SCRIPT FIXLAG", "SCRIPT NHẶT TRÁI",
 	"SCRIPT AIMBOT", "SCRIPT TỔNG HỢP", "GROW A GARDEN"
 }
@@ -150,8 +150,7 @@ createScriptButton(farmTab, "cokka", "https://raw.githubusercontent.com/UserDevE
 createScriptButton(farmTab, "mingaming", "https://raw.githubusercontent.com/MinGamingHubNew/RealMinGaming/refs/heads/main/MinGaminvHubBloxFruits.lua")
 
 local fixlagTab = tabPages["SCRIPT FIXLAG"]
-createScriptButton(fixlagTab, "Turbo FixLag", "https://raw.githubusercontent.com/phuccodelo2/phucfixlag/refs/heads/main/Phucmax_FixLag_Full.lua")
-
+createScriptButton(fixlagTab, "Turbo FixLag", "https://raw.githubusercontent.com/TurboLite/Script/main/FixLag.lua")
 local kaitunTab = tabPages["SCRIPT KAITUN"]
 createScriptButton(kaitunTab, "kaitun royx", "https://api.realaya.xyz/v1/files/l/73mkp0aqyfo4ypy8hvl0nz10lq49fey5.lua")
 createScriptButton(kaitunTab, "kaitun v1", "https://raw.githubusercontent.com/skibidip1/Hack/refs/heads/main/4ca1f2ace4cc1d14.txt")
