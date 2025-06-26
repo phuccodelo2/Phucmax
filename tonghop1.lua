@@ -32,7 +32,7 @@ local function createScriptButton(parent, name, url)
 				Title = "✅ Đã chạy!",
 				Text = "Script '" .. name .. "' đã được chạy!",
 				Duration = 4,
-				Icon = "rbxassetid://7072718364"
+				Icon = "rbxassetid://96060225144044"
 			})
 		end)
 	end)
