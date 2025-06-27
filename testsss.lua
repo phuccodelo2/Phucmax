@@ -64,53 +64,44 @@ function createButton(text, callback)
 end
 
 -- 🧠 Các chức năng
-createButton("Bất tử", function(on)
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
 
-    if on and humanoid then
-        -- Set máu vĩnh viễn
-        humanoid.Name = "GodHumanoid"
-        humanoid.Health = math.huge
-        humanoid.MaxHealth = math.huge
-
-        -- Xóa thanh máu
-        local head = char:FindFirstChild("Head")
-        if head and head:FindFirstChild("HealthDisplayDistance") then
-            head:FindFirstChild("HealthDisplayDistance"):Destroy()
-        end
-
-        -- Vòng lặp giữ máu = vô hạn
-        spawn(function()
-            while on and humanoid and humanoid.Parent do
-                if humanoid.Health < math.huge then
-                    humanoid.Health = math.huge
-                end
-                wait(0.1)
-            end
-        end)
-
-        -- Miễn nhiễm ragdoll
-        humanoid.PlatformStand = false
-        humanoid:GetPropertyChangedSignal("PlatformStand"):Connect(function()
-            if on and humanoid.PlatformStand then
-                humanoid.PlatformStand = false
-            end
-        end)
-    else
-        -- Tắt GodMode
-        if humanoid then
-            humanoid.Name = "Humanoid"
-            humanoid.MaxHealth = 100
-            humanoid.Health = 100
-        end
-    end
-end)
 
 createButton("Chống té ngã", function(on)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if on and humanoid then
         humanoid.PlatformStand = false
-        humanoid:GetPropertyChangedSignal("PlatformStand"):Connect(function()
+        humanoid:GetPropertyChangedSignal("PlatformStand"):ConnecreateButton("Bất tử", function(on)
+    if on then
+        local char = player.Character
+        local oldHumanoid = char:FindFirstChildOfClass("Humanoid")
+        if oldHumanoid then
+            -- Tạo bộ điều khiển thay thế
+            local animCtrl = Instance.new("AnimationController")
+            animCtrl.Name = "PhucMax"
+            animCtrl.Parent = char
+
+            -- Giữ RootPart, các part khác
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+
+            -- Xoá Humanoid
+            oldHumanoid:Destroy()
+
+            -- Vô hiệu hóa mọi ragdoll, damage
+            if hrp then
+                hrp:SetNetworkOwner(player)
+            end
+
+            -- Gỡ luôn thanh máu
+            local head = char:FindFirstChild("Head")
+            if head and head:FindFirstChild("HealthDisplayDistance") then
+                head:FindFirstChild("HealthDisplayDistance"):Destroy()
+            end
+        end
+    else
+        -- Load lại character bình thường để có lại humanoid
+        player:LoadCharacter()
+    end
+end)ct(function()
             if humanoid.PlatformStand then
                 humanoid.PlatformStand = false
             end
