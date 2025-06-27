@@ -152,16 +152,25 @@ end)
 createButton("Tăng sức bật", function(on)
     local humanoid = char:FindFirstChildOfClass("Humanoid")
     if humanoid then
-        humanoid.JumpPower = on and 150 or 50
+        humanoid.UseJumpPower = false
+        humanoid.JumpHeight = on and 80 or 7.2  -- 80 là cao vừa, không gây lỗi
     end
 end)
 
 createButton("Nhảy không giới hạn", function(on)
+    local UIS = game:GetService("UserInputService")
+    local debounce = false
     if on then
         _G.InfJump = true
-        game:GetService("UserInputService").JumpRequest:Connect(function()
-            if _G.InfJump then
-                player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+        UIS.JumpRequest:Connect(function()
+            if _G.InfJump and not debounce then
+                local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid:GetState() ~= Enum.HumanoidStateType.Freefall then
+                    debounce = true
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    wait(0.25) -- cooldown để tránh spam
+                    debounce = false
+                end
             end
         end)
     else
