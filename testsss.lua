@@ -65,12 +65,44 @@ end
 
 -- 🧠 Các chức năng
 createButton("Bất tử", function(on)
-    if on then
-        char:FindFirstChildOfClass("Humanoid").Health = math.huge
-        char:FindFirstChildOfClass("Humanoid").MaxHealth = math.huge
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+    if on and humanoid then
+        -- Set máu vĩnh viễn
+        humanoid.Name = "GodHumanoid"
+        humanoid.Health = math.huge
+        humanoid.MaxHealth = math.huge
+
+        -- Xóa thanh máu
+        local head = char:FindFirstChild("Head")
+        if head and head:FindFirstChild("HealthDisplayDistance") then
+            head:FindFirstChild("HealthDisplayDistance"):Destroy()
+        end
+
+        -- Vòng lặp giữ máu = vô hạn
+        spawn(function()
+            while on and humanoid and humanoid.Parent do
+                if humanoid.Health < math.huge then
+                    humanoid.Health = math.huge
+                end
+                wait(0.1)
+            end
+        end)
+
+        -- Miễn nhiễm ragdoll
+        humanoid.PlatformStand = false
+        humanoid:GetPropertyChangedSignal("PlatformStand"):Connect(function()
+            if on and humanoid.PlatformStand then
+                humanoid.PlatformStand = false
+            end
+        end)
     else
-        char:FindFirstChildOfClass("Humanoid").MaxHealth = 100
-        char:FindFirstChildOfClass("Humanoid").Health = 100
+        -- Tắt GodMode
+        if humanoid then
+            humanoid.Name = "Humanoid"
+            humanoid.MaxHealth = 100
+            humanoid.Health = 100
+        end
     end
 end)
 
