@@ -1,0 +1,174 @@
+repeat wait() until game:IsLoaded()
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local root = char:WaitForChild("HumanoidRootPart")
+
+
+player.CharacterAdded:Connect(function()
+	wait(1)
+	loadstring(game:HttpGet("https://pastebin.com/raw/xxxxxxxx"))() 
+end)
+
+
+local doorPositions = {
+	Vector3.new(-469, -7, -102), Vector3.new(-468, -7, 8), Vector3.new(-467, -7, 112),
+	Vector3.new(-466, -8, 220), Vector3.new(-355, -8, 219), Vector3.new(-354, -8, 112),
+	Vector3.new(-353, -7, 4), Vector3.new(-353, -7, -100)
+}
+
+local function getNearestDoor()
+	local closest, minDist = nil, math.huge
+	for _, door in ipairs(doorPositions) do
+		local dist = (root.Position - door).Magnitude
+		if dist < minDist then
+			minDist = dist
+			closest = door
+		end
+	end
+	return closest
+end
+
+
+local function goUp()
+	local door = getNearestDoor()
+	if door then
+		TweenService:Create(root, TweenInfo.new(1.2), {CFrame = CFrame.new(door)}):Play()
+		wait(1.3)
+		root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
+	end
+end
+
+
+local function dropDown()
+	root.CFrame = root.CFrame - Vector3.new(0, 50, 0)
+end
+
+
+local jumpEnabled = false
+UserInputService.JumpRequest:Connect(function()
+	if jumpEnabled then
+		local hum = player.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum:ChangeState("Jumping") end
+	end
+end)
+
+
+local function setGodMode(on)
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if not hum then return end
+	if on then
+		hum.MaxHealth = math.huge
+		hum.Health = math.huge
+		hum:GetPropertyChangedSignal("Health"):Connect(function()
+			if hum.Health < math.huge then hum.Health = math.huge end
+		end)
+	else
+		hum.MaxHealth = 99999
+		hum.Health = 99999
+	end
+end
+
+local speedEnabled = false
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local cam = workspace.CurrentCamera
+
+
+local SPEED_VALUE = 70
+
+
+local function startSpeed()
+    speedEnabled = true
+end
+
+
+local function stopSpeed()
+    speedEnabled = false
+end
+
+
+RunService.RenderStepped:Connect(function(dt)
+    if speedEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = player.Character.HumanoidRootPart
+        local dir = cam.CFrame.LookVector
+        hrp.CFrame = hrp.CFrame + Vector3.new(dir.X, 0, dir.Z).Unit * SPEED_VALUE * dt
+    end
+end)
+
+                 (bypass)", function(on)
+    if on then
+        startSpeed()
+    else
+        stopSpeed()
+    end
+end)
+
+
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "PhucmaxUI"
+gui.ResetOnSpawn = false
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 260, 0, 280)
+main.Position = UDim2.new(0.5, -130, 0.4, -175)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.Active = true
+main.Draggable = true
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.BackgroundTransparency = 1
+title.Text = "phucmax"
+title.Font = Enum.Font.FredokaOne
+title.TextScaled = true
+title.TextColor3 = Color3.new(1, 1, 1)
+
+local content = Instance.new("Frame", main)
+content.Size = UDim2.new(1, 0, 1, -50)
+content.Position = UDim2.new(0, 0, 0, 45)
+content.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", content)
+layout.Padding = UDim.new(0, 8)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function createButton(text, callback)
+	local btn = Instance.new("TextButton", content)
+	btn.Size = UDim2.new(0.85, 0, 0, 32)
+	btn.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Text = text
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 14
+	btn.AutoButtonColor = false
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+
+	local state = false
+	btn.MouseButton1Click:Connect(function()
+		state = not state
+		btn.BackgroundColor3 = state and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(170, 0, 0)
+		callback(state)
+	end)
+end
+
+
+createButton("cướp rồi bật cái này lên", function(on) if on then goUp() end end)
+createButton("Rơi xuống", function(on) if on then dropDown() end end)
+createButton("nhảy cao", function(on)
+	local hum = char:FindFirstChildOfClass("Humanoid")
+	if hum then hum.JumpPower = on and 250 or 50 end
+	jumpEnabled = on
+end)
+createButton("muốn nhảy cao không chết thì bật", function(on)
+	setGodMode(on)
+	if on then wait(0.3) char:BreakJoints() end
+end)
+createButton("speed bật một lần ", function(on)
+	setSpeed(on)
+end)
