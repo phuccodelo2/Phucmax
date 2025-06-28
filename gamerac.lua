@@ -188,7 +188,7 @@ local function showNotification(msg)
 	local notify = Instance.new("TextLabel")
 	notify.Parent = gui
 	notify.Size = UDim2.new(0, 300, 0, 40)
-	notify.Position = UDim2.new(1, -150, 0, 5)
+	notify.Position = UDim2.new(1, -600, 0, 5)
 	notify.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	notify.TextColor3 = Color3.fromRGB(255, 255, 255)
 	notify.Font = Enum.Font.GothamBold
