@@ -20,6 +20,10 @@ player.CharacterAdded:Connect(function()
 end)
 
 
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local root = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+
 local doorPositions = {
 	Vector3.new(-466, -1, 220),
 	Vector3.new(-466, -2, 116),
@@ -43,14 +47,15 @@ local function getNearestDoor()
 	return closest
 end
 
-
 local function goUp()
 	local door = getNearestDoor()
-	if door then
-		TweenService:Create(root, TweenInfo.new(1.2), {CFrame = CFrame.new(door)}):Play()
-		wait(1.3)
-		root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
-	end
+	if not door then return end
+
+	local targetPosition = door + Vector3.new(0, 200, 0)
+	local goalCFrame = CFrame.new(targetPosition)
+
+	local tween = TweenService:Create(root, TweenInfo.new(2, Enum.EasingStyle.Linear), {CFrame = goalCFrame})
+	tween:Play()
 end
 
 local function dropDown()
