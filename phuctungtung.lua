@@ -82,13 +82,58 @@ function setGodMode(on)
 	end
 end
 
+function setInvisible(on)
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			part.Transparency = on and 1 or 0
+		elseif part:IsA("Decal") then
+			part.Transparency = on and 1 or 0
+		end
+	end
+end
+UserInputService.JumpRequest:Connect(function()
+	if _G.FlyJump then
+		local hum = char:FindFirstChildOfClass("Humanoid")
+		if hum then
+			hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			root.Velocity = Vector3.new(0, 120, 0)
+		end
+	end
+end)
+function setESPPlayer(on)
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+			if on then
+				local highlight = Instance.new("Highlight", plr.Character)
+				highlight.Name = "PlayerESP"
+				highlight.FillColor = Color3.fromRGB(255, 0, 0)
+
+				local nameTag = Instance.new("BillboardGui", plr.Character.HumanoidRootPart)
+				nameTag.Name = "NameTag"
+				nameTag.Size = UDim2.new(0, 100, 0, 40)
+				nameTag.AlwaysOnTop = true
+
+				local nameText = Instance.new("TextLabel", nameTag)
+				nameText.Size = UDim2.new(1, 0, 1, 0)
+				nameText.Text = plr.DisplayName
+				nameText.TextColor3 = Color3.new(1, 0, 0)
+				nameText.BackgroundTransparency = 1
+			else
+				if plr.Character:FindFirstChild("PlayerESP") then plr.Character.PlayerESP:Destroy() end
+				if plr.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("NameTag") then
+					plr.Character.HumanoidRootPart.NameTag:Destroy()
+				end
+			end
+		end
+	end
+end
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PhucmaxUI"
 gui.ResetOnSpawn = false
 
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 260, 0, 270)
+main.Size = UDim2.new(0, 260, 0, 320)
 main.Position = UDim2.new(0.5, -130, 0.4, -175)
 main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 main.Active = true
@@ -177,7 +222,25 @@ end)
 createButton("Bất tử", function(on)
 	setGodMode(on)
 end)
+-- Tàng hình
+createButton("Tàng hình", function(on)
+	setInvisible(on)
+end)
 
+-- Nhảy bay
+createButton("Nhảy bay", function(on)
+	_G.FlyJump = on
+end)
+
+-- ESP người chơi
+createButton("ESP người chơi", function(on)
+	setESPPlayer(on)
+end)
+
+-- Anti Stun
+createButton("Anti Stun", function(on)
+	antiStun(on)
+end)
 
 local sound = Instance.new("Sound", gui)
 sound.SoundId = "rbxassetid://120471255813363" 
