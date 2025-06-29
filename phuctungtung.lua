@@ -176,10 +176,15 @@ spawn(function()
 		end
 	end
 end)
-local content = Instance.new("Frame", main)
-content.Size = UDim2.new(1, 0, 1, -50)
-content.Position = UDim2.new(0, 0, 0, 45)
+local content = Instance.new("ScrollingFrame", main)
+content.Size = UDim2.new(1, -10, 1, -50)
+content.Position = UDim2.new(0, 5, 0, 45)
 content.BackgroundTransparency = 1
+content.CanvasSize = UDim2.new(0, 0, 0, 0)
+content.ScrollBarThickness = 6
+content.ScrollingDirection = Enum.ScrollingDirection.Y
+content.AutomaticCanvasSize = Enum.AutomaticSize.Y
+content.ClipsDescendants = true
 
 local logo = Instance.new("ImageButton")
 logo.Name = "ToggleButton"
