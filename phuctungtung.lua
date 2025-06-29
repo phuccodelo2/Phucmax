@@ -91,12 +91,20 @@ function setInvisible(on)
 		end
 	end
 end
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local root = char:WaitForChild("HumanoidRootPart")
+
+_G.SuperJump = false
+
 UserInputService.JumpRequest:Connect(function()
-	if _G.FlyJump then
+	if _G.SuperJump then
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		if hum then
 			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			root.Velocity = Vector3.new(0, 120, 0)
+			root.Velocity = root.CFrame.LookVector * 80 + Vector3.new(0, 100, 0)
 		end
 	end
 end)
