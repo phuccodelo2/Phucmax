@@ -21,9 +21,9 @@ end)
 
 
 local doorPositions = {
-	Vector3.new(-469, 7, -102), Vector3.new(-468, -7, 8), Vector3.new(-467, -7, 112),
-	Vector3.new(-466, 8, 220), Vector3.new(-355, -8, 219), Vector3.new(-354, -8, 112),
-	Vector3.new(-353, 7, 4), Vector3.new(-353, -7, -100)
+	Vector3.new(-469, 50, -102), Vector3.new(-468, -50, 8), Vector3.new(-467, -7, 112),
+	Vector3.new(-466, 50, 220), Vector3.new(-355, -50, 219), Vector3.new(-354, -8, 112),
+	Vector3.new(-353, 50, 4), Vector3.new(-353, -50, -100)
 }
 
 local function getNearestDoor()
