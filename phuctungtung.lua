@@ -225,28 +225,28 @@ local function createButton(text, callback)
 end
 
 
-createButton("tele lên cao", function(on) if on then goUp() end end)
-createButton("Rơi xuống", function(on) if on then dropDown() end end)
-createButton("Nhảy vô hạn", function(on)
+createButton("Teleport to Sky", function(on) if on then goUp() end end)
+createButton("Go Down", function(on) if on then dropDown() end end)
+createButton("Unlimited Jump", function(on)
 	local hum = char and char:FindFirstChildOfClass("Humanoid")
 	if hum then hum.JumpPower = on and 250 or 50 end
 	jumpEnabled = on
 end)
-createButton("Bất tử", function(on)
+createButton("God Mode", function(on)
 	setGodMode(on)
 end)
 -- Tàng hình
-createButton("Tàng hình", function(on)
+createButton("Invisibility", function(on)
 	setInvisible(on)
 end)
 
 -- Nhảy bay
-createButton("Nhảy bay", function(on)
+createButton("High Jump", function(on)
 	_G.FlyJump = on
 end)
 
 -- ESP người chơi
-createButton("ESP người chơi", function(on)
+createButton("ESP player", function(on)
 	setESPPlayer(on)
 end)
 
