@@ -104,7 +104,7 @@ UserInputService.JumpRequest:Connect(function()
 		local hum = char:FindFirstChildOfClass("Humanoid")
 		if hum then
 			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			root.Velocity = root.CFrame.LookVector * 1000 + Vector3.new(0, 100, 0)
+			root.Velocity = root.CFrame.LookVector * 2000 + Vector3.new(0, 200, 0)
 		end
 	end
 end)
