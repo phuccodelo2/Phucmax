@@ -158,7 +158,7 @@ end)
 createButton("Fall Down", function()
 	local hrp = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
 	if hrp then
-		hrp.CFrame = hrp.CFrame - Vector3.new(0, 200, 0)
+		hrp.CFrame = hrp.CFrame - Vector3.new(0, 100, 0)
 	end
 end)
 
