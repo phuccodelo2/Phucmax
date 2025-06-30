@@ -246,7 +246,53 @@ createButton("Teleport to Floor2", function(state)
 		teleLau2Active = false
 	end)
 end)
-			.new(0, 2, 0)
+		
+-- === Infinite Jump ===
+createButton("Infinite Jump", function(state)
+	if state then
+		UserInputService.JumpRequest:Connect(function()
+			if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+				LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+		end)
+	end
+end)
+
+-- === Godmode ===
+local godConn
+createButton("Godmode", function(state)
+	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local hum = char:WaitForChild("Humanoid")
+	if state then
+		godConn = hum:GetPropertyChangedSignal("Health"):Connect(function()
+			if hum.Health < 100 then
+				hum.Health = 100
+			end
+		end)
+	else
+		if odConn then godConn:Disconnect() end
+	end
+end)
+
+local espEnabled = false
+local espFolder = Instance.new("Folder", CoreGui)
+espFolder.Name = "ESPFolder"
+
+local function clearESP()
+	for _, v in ipairs(espFolder:GetChildren()) do
+		v:Destroy()
+	end
+end
+
+local function createESP()
+	clearESP()
+	for _, player in ipairs(Players:GetPlayers()) do
+		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
+			local head = player.Character.Head
+			local billboard = Instance.new("BillboardGui", espFolder)
+			billboard.Adornee = head
+			billboard.Size = UDim2.new(0, 100, 0, 40)
+			billboard.StudsOffset = Vector3.new(0, 2, 0)
 			billboard.AlwaysOnTop = true
 
 			local label = Instance.new("TextLabel", billboard)
@@ -273,34 +319,7 @@ createButton("ESP ", function(state)
 		clearESP()
 	end
 end)
-
--- === Infinite Jump ===
-createButton("Infinite Jump", function(state)
-	if state then
-		UserInputService.JumpRequest:Connect(function()
-			if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-				LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-			end
-		end)
-	end
-end)
-
--- === Godmode ===
-local godConn
-createButton("Godmode", function(state)
-	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-	local hum = char:WaitForChild("Humanoid")
-	if state then
-		godConn = hum:GetPropertyChangedSignal("Health"):Connect(function()
-			if hum.Health < 100 then
-				hum.Health = 100
-			end
-		end)
-	else
-		if godConn then godConn:Disconnect() end
-	end
-end)
-
+		
 -- === Anti-Stun ===
 createButton("Anti-Stun", function(state)
 	if state then
