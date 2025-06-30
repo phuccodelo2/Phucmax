@@ -164,44 +164,6 @@ createButton("Fall Down", function()
 end)
 local teleLau2Active = false
 
-createButton("Teleport to Floor2", function(state)
-	teleLau2Active = state
-
-	if not teleLau2Active then
-		showNotification("Teleport to Floor2")
-		return
-	end
-
-	showNotification("Teleport to Floor2")
-
-	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local target = Vector3.new(-298.5, 12.9, 39.4) Vector3.new(-297.7, 12.9, 145.3) Vector3.new(-297.4, 12.9, -68.0) Vector3.new(-519.1, 12.9, 188.6) Vector3.new(-520.2, 12.9, 81.0) Vector3.new(-522.2, 12.9, -27.1)  Vector3.new(-520.0, 12.9
-
--134.7)
-		       
-
-	task.spawn(function()
-		while teleLau2Active and (Vector2.new(hrp.Position.X, hrp.Position.Z) - Vector2.new(target.X, target.Z)).Magnitude > 5 do
-			-- Xoay mặt hướng đến đích
-			hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(target.X, hrp.Position.Y, target.Z))
-
-			-- Tính hướng bay + lệch trái nhẹ
-			local direction = (Vector3.new(target.X, hrp.Position.Y, target.Z) - hrp.Position).Unit
-			local left = Vector3.new(-direction.Z, 0, direction.X)
-			local move = (direction + left * 0.3).Unit * (80 / 60)
-
-			hrp.CFrame = hrp.CFrame + move
-			task.wait(1/60)
-		end
-
-		if teleLau2Active then
-			hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
-			showNotification("Teleport to Floor2")
-		end
-
-		teleLau2Active = false
-	end)
-end)
 -- === ESP Players (Auto Update) ===
 local espEnabled = false
 local espFolder = Instance.new("Folder", CoreGui)
@@ -221,7 +183,70 @@ local function createESP()
 			local billboard = Instance.new("BillboardGui", espFolder)
 			billboard.Adornee = head
 			billboard.Size = UDim2.new(0, 100, 0, 40)
-			billboard.StudsOffset = Vector3.new(0, 2, 0)
+			billboard.StudsOffset = Vector3local teleLau2Active = false
+
+-- Danh sách các cửa Lầu 2
+local floor2Positions = {
+	Vector3.new(-298.5, 12.9, 39.4),
+	Vector3.new(-297.7, 12.9, 145.3),
+	Vector3.new(-297.4, 12.9, -68.0),
+	Vector3.new(-519.1, 12.9, 188.6),
+	Vector3.new(-520.2, 12.9, 81.0),
+	Vector3.new(-522.2, 12.9, -27.1),
+	Vector3.new(-520.0, 12.9, -134.7)
+}
+
+-- Hàm tìm toạ độ gần nhất
+local function getClosestFloor2Pos()
+	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	local closest, minDist = nil, math.huge
+	for _, pos in ipairs(floor2Positions) do
+		local dist = (hrp.Position - pos).Magnitude
+		if dist < minDist then
+			minDist = dist
+			closest = pos
+		end
+	end
+	return closest
+end
+
+-- Nút bật/tắt Tele Floor 2
+createButton("Teleport to Floor2", function(state)
+	teleLau2Active = state
+
+	if not teleLau2Active then
+		showNotification("Teleport to Floor2: OFF")
+		return
+	end
+
+	showNotification("Teleport to Floor2: ON")
+
+	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	local target = getClosestFloor2Pos()
+
+	task.spawn(function()
+		while teleLau2Active and (Vector2.new(hrp.Position.X, hrp.Position.Z) - Vector2.new(target.X, target.Z)).Magnitude > 5 do
+			-- Xoay mặt hướng đến đích
+			hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(target.X, hrp.Position.Y, target.Z))
+
+			-- Tính hướng bay + lệch trái nhẹ
+			local direction = (Vector3.new(target.X, hrp.Position.Y, target.Z) - hrp.Position).Unit
+			local left = Vector3.new(-direction.Z, 0, direction.X)
+			local move = (direction + left * 0.3).Unit * (80 / 60)
+
+			hrp.CFrame = hrp.CFrame + move
+			task.wait(1/60)
+		end
+
+		if teleLau2Active then
+			hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
+			showNotification("Teleported to Floor2!")
+		end
+
+		teleLau2Active = false
+	end)
+end)
+			.new(0, 2, 0)
 			billboard.AlwaysOnTop = true
 
 			local label = Instance.new("TextLabel", billboard)
