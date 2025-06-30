@@ -162,28 +162,6 @@ createButton("Fall Down", function()
 		hrp.CFrame = hrp.CFrame - Vector3.new(0, 100, 0)
 	end
 end)
-local teleLau2Active = false
-
--- === ESP Players (Auto Update) ===
-local espEnabled = false
-local espFolder = Instance.new("Folder", CoreGui)
-espFolder.Name = "ESPFolder"
-
-local function clearESP()
-	for _, v in ipairs(espFolder:GetChildren()) do
-		v:Destroy()
-	end
-end
-
-local function createESP()
-	clearESP()
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("Head") then
-			local head = player.Character.Head
-			local billboard = Instance.new("BillboardGui", espFolder)
-			billboard.Adornee = head
-			billboard.Size = UDim2.new(0, 100, 0, 40)
-			billboard.StudsOffset = Vector3local teleLau2Active = false
 
 -- Danh sách các cửa Lầu 2
 local floor2Positions = {
@@ -196,56 +174,62 @@ local floor2Positions = {
 	Vector3.new(-520.0, 12.9, -134.7)
 }
 
--- Hàm tìm toạ độ gần nhất
-local function getClosestFloor2Pos()
-	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local closest, minDist = nil, math.huge
-	for _, pos in ipairs(floor2Positions) do
+-- === Bay đến toạ độ gần nhất rồi bay lên trời
+local function flyToPosition(pos)
+	local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	local hrp = character:WaitForChild("HumanoidRootPart")
+
+	local flying = true
+	local connection
+	connection = RunService.RenderStepped:Connect(function()
+		if not flying then connection:Disconnect() return end
+
+		-- Hướng mặt theo tọa độ đích
+		local direction = (pos - hrp.Position).Unit
+		hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + direction)
+
+		-- Bay thẳng tới
+		hrp.CFrame = hrp.CFrame + direction * 2
+
+		-- Nếu tới gần thì tele lên trời
+		if (hrp.Position - pos).Magnitude < 5 then
+			flying = false
+			hrp.CFrame = CFrame.new(pos.X, pos.Y + 200, pos.Z)
+		end
+	end)
+end
+
+-- === Lấy toạ độ gần nhất
+local function getClosestCustom()
+	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+
+	local closest = nil
+	local shortestDist = math.huge
+	for _, pos in ipairs(customPositions) do
 		local dist = (hrp.Position - pos).Magnitude
-		if dist < minDist then
-			minDist = dist
+		if dist < shortestDist then
+			shortestDist = dist
 			closest = pos
 		end
 	end
 	return closest
 end
 
--- Nút bật/tắt Tele Floor 2
-createButton("Teleport to Floor2", function(state)
-	teleLau2Active = state
-
-	if not teleLau2Active then
-		showNotification("Teleport to Floor2: OFF")
-		return
+-- === Nút TELE GẦN NHẤT
+createButton("Teleport  Floor2", function(state)
+	if state then
+		local target = getClosestCustom()
+		if target then
+			showNotification("Teleport  Floor2")
+			flyToPosition(target)
+		else
+			showNotification("No suitable location found ")
+		end
 	end
-
-	showNotification("Teleport to Floor2: ON")
-
-	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-	local target = getClosestFloor2Pos()
-
-	task.spawn(function()
-		while teleLau2Active and (Vector2.new(hrp.Position.X, hrp.Position.Z) - Vector2.new(target.X, target.Z)).Magnitude > 5 do
-			-- Xoay mặt hướng đến đích
-			hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(target.X, hrp.Position.Y, target.Z))
-
-			-- Tính hướng bay + lệch trái nhẹ
-			local direction = (Vector3.new(target.X, hrp.Position.Y, target.Z) - hrp.Position).Unit
-			local left = Vector3.new(-direction.Z, 0, direction.X)
-			local move = (direction + left * 0.3).Unit * (80 / 60)
-
-			hrp.CFrame = hrp.CFrame + move
-			task.wait(1/60)
-		end
-
-		if teleLau2Active then
-			hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
-			showNotification("Teleported to Floor2!")
-		end
-
-		teleLau2Active = false
-	end)
 end)
+			
+
 		
 -- === Infinite Jump ===
 createButton("Infinite Jump", function(state)
