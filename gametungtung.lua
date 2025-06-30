@@ -130,6 +130,7 @@ local doorPositions = {
     Vector3.new(-352.2, 5.3, 5.4),  -- chayf1d7a14752
     Vector3.new(-352.6, 5.1, -97.8),
     Vector3.new(-352.5, 4.5, 4.5),
+    Vector3.new(-466.8, -6.8, 221.1),
 }
 local function getClosestDoor()
 	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
@@ -143,7 +144,7 @@ local function getClosestDoor()
 	end
 	return closest
 end
-createButton("Teleport Sky", function()
+createButton("Teleport to Floor1", function()
 	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 	local target = getClosestDoor()
 	if not target then return end
@@ -161,7 +162,46 @@ createButton("Fall Down", function()
 		hrp.CFrame = hrp.CFrame - Vector3.new(0, 100, 0)
 	end
 end)
+local teleLau2Active = false
 
+createButton("Teleport to Floor2", function(state)
+	teleLau2Active = state
+
+	if not teleLau2Active then
+		showNotification("Teleport to Floor2")
+		return
+	end
+
+	showNotification("Teleport to Floor2")
+
+	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	local target = Vector3.new(-298.5, 12.9, 39.4) Vector3.new(-297.7, 12.9, 145.3) Vector3.new(-297.4, 12.9, -68.0) Vector3.new(-519.1, 12.9, 188.6) Vector3.new(-520.2, 12.9, 81.0) Vector3.new(-522.2, 12.9, -27.1)  Vector3.new(-520.0, 12.9
+
+-134.7)
+		       
+
+	task.spawn(function()
+		while teleLau2Active and (Vector2.new(hrp.Position.X, hrp.Position.Z) - Vector2.new(target.X, target.Z)).Magnitude > 5 do
+			-- Xoay mặt hướng đến đích
+			hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(target.X, hrp.Position.Y, target.Z))
+
+			-- Tính hướng bay + lệch trái nhẹ
+			local direction = (Vector3.new(target.X, hrp.Position.Y, target.Z) - hrp.Position).Unit
+			local left = Vector3.new(-direction.Z, 0, direction.X)
+			local move = (direction + left * 0.3).Unit * (80 / 60)
+
+			hrp.CFrame = hrp.CFrame + move
+			task.wait(1/60)
+		end
+
+		if teleLau2Active then
+			hrp.CFrame = hrp.CFrame + Vector3.new(0, 200, 0)
+			showNotification("Teleport to Floor2")
+		end
+
+		teleLau2Active = false
+	end)
+end)
 -- === ESP Players (Auto Update) ===
 local espEnabled = false
 local espFolder = Instance.new("Folder", CoreGui)
