@@ -2,71 +2,6 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local root = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
-
-local doorPositions = {
-	Vector3.new(-466, -1, 220),
-	Vector3.new(-466, -2, 116),
-	Vector3.new(-466, -2, 8),
-	Vector3.new(-464, -2, -102),
-	Vector3.new(-351, -2, -100),
-	Vector3.new(-354, -2, 5),
-	Vector3.new(-354, -2, 115),
-	Vector3.new(-358, -2, 223)
-}
-
--- Hàm tìm cửa gần nhất
-local function getNearestDoor()
-	local closest, minDist = nil, math.huge
-	for _, door in ipairs(doorPositions) do
-		local dist = (root.Position - door).Magnitude
-		if dist < minDist then
-			minDist = dist
-			closest = door
-		end
-	end
-	return closest
-end
-
--- Hàm bật NoClip
-local noclipConn
-local function enableNoClip()
-	if noclipConn then noclipConn:Disconnect() end
-	noclipConn = RunService.Stepped:Connect(function()
-		if Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
-			Players.LocalPlayer.Character.Humanoid:ChangeState(11) -- NoClip
-		end
-	end)
-end
-
--- Hàm tắt NoClip
-local function disableNoClip()
-	if noclipConn then
-		noclipConn:Disconnect()
-		noclipConn = nil
-	end
-end
-
--- Hàm bay lên cửa gần nhất + NoClip
-local function goUp()
-	local door = getNearestDoor()
-	if not door then return end
-
-	local targetPosition = door + Vector3.new(0, 200, 0)
-	local goalCFrame = CFrame.new(targetPosition)
-
-	enableNoClip() -- Bật NoClip trước khi bay
-
-	local tween = TweenService:Create(root, TweenInfo.new(2, Enum.EasingStyle.Linear), {CFrame = goalCFrame})
-	tween:Play()
-
-	tween.Completed:Connect(function()
-		disableNoClip() -- Tắt NoClip sau khi bay xong
-	end)
-end
-
--- Gọi thử
--- goUp()repeat wait() until game:IsLoaded()
-
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -86,9 +21,34 @@ player.CharacterAdded:Connect(function()
 	updateChar()
 end)
 
+local doorPositions = {
+	Vector3.new(-466, -1, 220),Vector3.new(-466, -2, 116),
+	Vector3.new(-466, -2, 8),Vector3.new(-464, -2, -102),Vector3.new(-351, -2, -100),
+	Vector3.new(-354, -2, 5),Vector3.new(-354, -2, 115),Vector3.new(-358, -2, 223)
+}
 
-local TweenService = game:GetService("TweenService")
 
+local function getNearestDoor()
+	local closest, minDist = nil, math.huge
+	for _, door in ipairs(doorPositions) do
+		local dist = (root.Position - door).Magnitude
+		if dist < minDist then
+			minDist = dist
+			closest = door
+		end
+	end
+	return closest
+end
+
+
+local function goUp()
+	local door = getNearestDoor()
+	if door then
+		TweenService:Create(root, TweenInfo.new(1.2), {CFrame = CFrame.new(door)}):Play()
+		wait(1.3)
+		root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
+	end
+end
 
 local function dropDown()
 	if root then
