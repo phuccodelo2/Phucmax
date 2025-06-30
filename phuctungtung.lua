@@ -95,53 +95,109 @@ function setInvisible(on)
 end
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
 local root = char:WaitForChild("HumanoidRootPart")
+local humanoid = char:FindFirstChildOfClass("Humanoid")
 
-_G.SuperJump = false
+_G.SlowFallJump = false
 
+-- Tạo trạng thái bay lên
 UserInputService.JumpRequest:Connect(function()
-	if _G.SuperJump then
-		local hum = char:FindFirstChildOfClass("Humanoid")
-		if hum then
-			hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			root.Velocity = root.CFrame.LookVector * 2000 + Vector3.new(0, 200, 0)
-		end
+	if _G.SlowFallJump and humanoid and root then
+		-- Bay lên cao
+		root.AssemblyLinearVelocity = Vector3.new(0, 100, 0)
+
+		-- Giảm trọng lực tạm thời để rơi chậm
+		local gravityConn
+		gravityConn = RunService.Stepped:Connect(function()
+			if not char or not root or not humanoid then
+				gravityConn:Disconnect()
+				return
+			end
+
+			-- Kiểm tra nếu nhân vật đã chạm đất thì dừng giảm lực
+			if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+				-- Làm giảm tốc độ rơi
+				root.Velocity = Vector3.new(root.Velocity.X, math.clamp(root.Velocity.Y, -20, 150), root.Velocity.Z)
+			elseif humanoid.FloorMaterial ~= Enum.Material.Air then
+				gravityConn:Disconnect()
+			end
+		end)
 	end
 end)
+
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "Phuclocal Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+function applyESP(plr)
+	if plr == player then return end
+	local function addESP(char)
+		if not char:FindFirstChild("HumanoidRootPart") then return end
+
+		-- Gỡ ESP cũ nếu có
+		if char:FindFirstChild("PlayerESP") then char.PlayerESP:Destroy() end
+		if char:FindFirstChild("HumanoidRootPart"):FindFirstChild("NameTag") then
+			char.HumanoidRootPart.NameTag:Destroy()
+		end
+
+		-- Highlight
+		local highlight = Instance.new("Highlight", char)
+		highlight.Name = "PlayerESP"
+		highlight.FillColor = Color3.fromRGB(255, 0, 0)
+		highlight.OutlineColor = Color3.new(1, 1, 1)
+
+		-- Name tag
+		local nameTag = Instance.new("BillboardGui", char.HumanoidRootPart)
+		nameTag.Name = "NameTag"
+		nameTag.Size = UDim2.new(0, 100, 0, 30)
+		nameTag.AlwaysOnTop = true
+		nameTag.StudsOffset = Vector3.new(0, 2, 0)
+
+		local nameText = Instance.new("TextLabel", nameTag)
+		nameText.Size = UDim2.new(1, 0, 1, 0)
+		nameText.BackgroundTransparency = 1
+		nameText.TextColor3 = Color3.fromRGB(255, 0, 0)
+		nameText.Text = plr.DisplayName
+		nameText.Font = Enum.Font.GothamBold
+		nameText.TextScaled = true
+	end
+
+	if plr.Character then
+		addESP(plr.Character)
+	end
+
+	plr.CharacterAdded:Connect(function(char)
+		repeat wait() until char:FindFirstChild("HumanoidRootPart")
+		addESP(char)
+	end)
+end
+
+-- Hàm bật / tắt ESP toàn bộ
+_G.espEnabled = false
+
 function setESPPlayer(on)
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-			if on then
-				local highlight = Instance.new("Highlight", plr.Character)
-				highlight.Name = "PlayerESP"
-				highlight.FillColor = Color3.fromRGB(255, 0, 0)
-
-				local nameTag = Instance.new("BillboardGui", plr.Character.HumanoidRootPart)
-				nameTag.Name = "NameTag"
-				nameTag.Size = UDim2.new(0, 100, 0, 40)
-				nameTag.AlwaysOnTop = true
-
-				local nameText = Instance.new("TextLabel", nameTag)
-				nameText.Size = UDim2.new(1, 0, 1, 0)
-				nameText.Text = plr.DisplayName
-				nameText.TextColor3 = Color3.new(1, 0, 0)
-				nameText.BackgroundTransparency = 1
-			else
-				if plr.Character:FindFirstChild("PlayerESP") then plr.Character.PlayerESP:Destroy() end
-				if plr.Character:FindFirstChild("HumanoidRootPart"):FindFirstChild("NameTag") then
-					plr.Character.HumanoidRootPart.NameTag:Destroy()
-				end
+	_G.espEnabled = on
+	if on then
+		for _, plr in pairs(Players:GetPlayers()) do
+			applyESP(plr)
+		end
+		Players.PlayerAdded:Connect(applyESP)
+	else
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr.Character and plr.Character:FindFirstChild("PlayerESP") then
+				plr.Character.PlayerESP:Destroy()
+			end
+			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local tag = plr.Character.HumanoidRootPart:FindFirstChild("NameTag")
+				if tag then tag:Destroy() end
 			end
 		end
 	end
 end
-
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "PhucmaxUI"
-gui.ResetOnSpawn = false
-
+maxUI"gui.ResetOnSpawn = false
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 260, 0, 320)
 main.Position = UDim2.new(0.5, -130, 0.4, -175)
