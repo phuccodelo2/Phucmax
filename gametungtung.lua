@@ -122,12 +122,14 @@ end
 
 -- === Teleport to Sky ===
 local doorPositions = {
-    Vector3.new(-466.9, 2.2, 220.4),  -- Noledaxanh
-    Vector3.new(-466.2, 5.1, 111.5),  -- second
+    Vector3.new(-466.2, 5.1, 111.5),  -- Noledaxanh
+    Vector3.new(-466.0, 5.0, 8.7),  -- second
     Vector3.new(-466.0, 5.0, -99.3),  -- LinhCut1
     Vector3.new(-353.4, 5.0, 219.9),  -- tucony4753
     Vector3.new(-352.2, 3.7, 114.4),  -- third
-    Vector3.new(-352.6, 5.1, -97.8),  -- chayf1d7a147526
+    Vector3.new(-352.2, 5.3, 5.4),  -- chayf1d7a14752
+    Vector3.new(-352.6, 5.1, -97.8),
+    Vector3.new(-352.5, 4.5, 4.5),
 }
 local function getClosestDoor()
 	local hrp = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
