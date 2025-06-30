@@ -21,10 +21,11 @@ end)
 
 
 local doorPositions = {
-	Vector3.new(-469, -7, -102), Vector3.new(-468, -7, 8), Vector3.new(-467, -7, 112),
-	Vector3.new(-466, -8, 220), Vector3.new(-355, -8, 219), Vector3.new(-354, -8, 112),
-	Vector3.new(-353, -7, 4), Vector3.new(-353, -7, -100)
+	Vector3.new(-466, -1, 220),Vector3.new(-466, -2, 116),
+	Vector3.new(-466, -2, 8),Vector3.new(-464, -2, -102),Vector3.new(-351, -2, -100),
+	Vector3.new(-354, -2, 5),Vector3.new(-354, -2, 115),Vector3.new(-358, -2, 223)
 }
+
 
 local function getNearestDoor()
 	local closest, minDist = nil, math.huge
@@ -46,7 +47,7 @@ local function goUp()
 		wait(1.3)
 		root.CFrame = root.CFrame + Vector3.new(0, 200, 0)
 	end
-end
+end 
 
 local function dropDown()
 	if root then
@@ -82,6 +83,111 @@ function setGodMode(on)
 	end
 end
 
+function setInvisible(on)
+	for _, part in ipairs(char:GetDescendants()) do
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+			part.Transparency = on and 1 or 0
+		elseif part:IsA("Decal") then
+			part.Transparency = on and 1 or 0
+		end
+	end
+end
+local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+_G.SlowFallJump = false
+
+-- Tạo trạng thái bay lên
+UserInputService.JumpRequest:Connect(function()
+	if _G.SlowFallJump and humanoid and root then
+		-- Bay lên cao
+		root.AssemblyLinearVelocity = Vector3.new(0, 100, 0)
+
+		-- Giảm trọng lực tạm thời để rơi chậm
+		local gravityConn
+		gravityConn = RunService.Stepped:Connect(function()
+			if not char or not root or not humanoid then
+				gravityConn:Disconnect()
+				return
+			end
+
+			-- Kiểm tra nếu nhân vật đã chạm đất thì dừng giảm lực
+			if humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+				-- Làm giảm tốc độ rơi
+				root.Velocity = Vector3.new(root.Velocity.X, math.clamp(root.Velocity.Y, -20, 150), root.Velocity.Z)
+			elseif humanoid.FloorMaterial ~= Enum.Material.Air then
+				gravityConn:Disconnect()
+			end
+		end)
+	end
+end)
+
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "Phuclocal Players = game:GetService("Players")
+
+function applyESP(plr)
+	if plr == player then return end
+		if not char:FindFirstChild("HumanoidRootPart") then return end
+
+		-- Gỡ ESP cũ nếu có
+		if char:FindFirstChild("PlayerESP") then char.PlayerESP:Destroy() end
+		if char:FindFirstChild("HumanoidRootPart"):FindFirstChild("NameTag") then
+			char.HumanoidRootPart.NameTag:Destroy()
+		end
+
+		-- Highlight
+		local highlight = Instance.new("Highlight", char)
+		highlight.Name = "PlayerESP"
+		highlight.FillColor = Color3.fromRGB(255, 0, 0)
+		highlight.OutlineColor = Color3.new(1, 1, 1)
+
+		-- Name tag
+		local nameTag = Instance.new("BillboardGui", char.HumanoidRootPart)
+		nameTag.Name = "NameTag"
+		nameTag.Size = UDim2.new(0, 100, 0, 30)
+		nameTag.AlwaysOnTop = true
+		nameTag.StudsOffset = Vector3.new(0, 2, 0)
+
+		local nameText = Instance.new("TextLabel", nameTag)
+		nameText.Size = UDim2.new(1, 0, 1, 0)
+		nameText.BackgroundTransparency = 1
+		nameText.TextColor3 = Color3.fromRGB(255, 0, 0)
+		nameText.Text = plr.DisplayName
+		nameText.Font = Enum.Font.GothamBold
+		nameText.TextScaled = true
+	end
+
+	if plr.Character then
+		addESP(plr.Character)
+	end
+
+	plr.CharacterAdded:Connect(function(char)
+		repeat wait() until char:FindFirstChild("HumanoidRootPart")
+		addESP(char)
+	end)
+end
+
+-- Hàm bật / tắt ESP toàn bộ
+_G.espEnabled = false
+
+function setESPPlayer(on)
+	_G.espEnabled = on
+	if on then
+		for _, plr in pairs(Players:GetPlayers()) do
+			applyESP(plr)
+		end
+		Players.PlayerAdded:Connect(applyESP)
+	else
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr.Character and plr.Character:FindFirstChild("PlayerESP") then
+				plr.Character.PlayerESP:Destroy()
+			end
+			if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+				local tag = plr.Character.HumanoidRootPart:FindFirstChild("NameTag")
+				if tag then tag:Destroy() end
+			end
+		end
+	end
+end
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PhucmaxUI"
@@ -132,7 +238,7 @@ local logo = Instance.new("ImageButton")
 logo.Name = "ToggleButton"
 logo.Parent = gui
 logo.Size = UDim2.new(0, 50, 0, 50)
-logo.Position = UDim2.new(0, 10, 0.5, -25)
+logo.Position = UDim2.new(0, 15, 1, 30) 
 logo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 logo.Image = "rbxassetid://113632547593752"
 logo.Draggable = true
@@ -167,16 +273,30 @@ local function createButton(text, callback)
 end
 
 
-createButton("tele lên cao", function(on) if on then goUp() end end)
-createButton("Rơi xuống", function(on) if on then dropDown() end end)
-createButton("Nhảy vô hạn", function(on)
-	local hum = char and char:FindFirstChildOfClass("Humanoid")
+createButton("Teleport to Sky", function(on) if on then goUp() end end)
+createButton("Go Down", function(on) if on then dropDown() end end)
+createButton("Unlimited Jump", function(on)
 	if hum then hum.JumpPower = on and 250 or 50 end
 	jumpEnabled = on
 end)
-createButton("Bất tử", function(on)
+createButton("God Mode", function(on)
 	setGodMode(on)
 end)
+-- Tàng hình
+createButton("Invisibility", function(on)
+	setInvisible(on)
+end)
+
+-- Nhảy bay
+createButton("High Jump", function(on)
+	_G.FlyJump = on
+end)
+
+-- ESP người chơi
+createButton("ESP player", function(on)
+	setESPPlayer(on)
+end)
+
 
 
 local sound = Instance.new("Sound", gui)
@@ -188,7 +308,7 @@ local function showNotification(msg)
 	local notify = Instance.new("TextLabel")
 	notify.Parent = gui
 	notify.Size = UDim2.new(0, 300, 0, 40)
-	notify.Position = UDim2.new(1, -310, 1, -60)
+	notify.Position = UDim2.new(0.5, -150, 0.1, 20)
 	notify.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 	notify.TextColor3 = Color3.fromRGB(255, 255, 255)
 	notify.Font = Enum.Font.GothamBold
