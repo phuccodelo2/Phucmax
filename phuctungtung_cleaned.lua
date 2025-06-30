@@ -1,7 +1,7 @@
-local TweenService = game:GetService("TweenService")
+repeat wait() until game:IsLoaded()
+
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local root = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 
@@ -17,7 +17,6 @@ updateChar()
 player.CharacterAdded:Connect(function()
 	wait(1)
 	updateChar()
-end)
 
 local doorPositions = {
 	Vector3.new(-466, -1, 220),Vector3.new(-466, -2, 116),
