@@ -217,7 +217,7 @@ local function getClosestCustom()
 end
 
 -- === Nút TELE GẦN NHẤT
-createButton("Teleport  Floor2", function(state)
+createButton("nothing hahahaha", function(state)
 	if state then
 		local target = getClosestCustom()
 		if target then
