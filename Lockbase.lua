@@ -50,7 +50,7 @@ btn.MouseButton1Click:Connect(function()
 		
 		if part and hrp then
 			-- 👇 Tele thấp xuống 2 đơn vị
-			hrp.CFrame = CFrame.new(part.Position - Vector3.new(0, 2, 0))
+			hrp.CFrame = CFrame.new(part.Position - Vector3.new(0, 3, 0))
 		end
 
 		task.wait(0.5)
