@@ -1,158 +1,67 @@
 --// Dịch vụ
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local SoundService = game:GetService("SoundService")
 
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local hum = character:WaitForChild("HumanoidRootPart")
 
---// Biến
-local farmActive = false
-local musicPlaying = false
-local sound = Instance.new("Sound", SoundService)
+--// UI
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+ScreenGui.Name = "BossFarmUI"
 
---// UI tạo
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "BossFarmUI"
-gui.ResetOnSpawn = false
+local toggleUIButton = Instance.new("TextButton")
+toggleUIButton.Size = UDim2.new(0, 100, 0, 30)
+toggleUIButton.Position = UDim2.new(0, 10, 0, 10)
+toggleUIButton.Text = "Ẩn/Hiện UI"
+toggleUIButton.Parent = ScreenGui
 
--- Logo tròn góc trái
-local logo = Instance.new("ImageLabel", gui)
-logo.Size = UDim2.new(0, 50, 0, 50)
-logo.Position = UDim2.new(0, 10, 0, 10)
-logo.BackgroundTransparency = 1
-logo.Image = "rbxassetid://113632547593752"
-logo.ImageColor3 = Color3.new(1, 1, 1)
+local mainUI = Instance.new("Frame")
+mainUI.Size = UDim2.new(0, 200, 0, 140)
+mainUI.Position = UDim2.new(0, 10, 0, 50)
+mainUI.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+mainUI.Visible = true
+mainUI.Parent = ScreenGui
 
--- Nút tròn bật/tắt Farm
-local circleBtn = Instance.new("TextButton", gui)
-circleBtn.Size = UDim2.new(0, 40, 0, 40)
-circleBtn.Position = UDim2.new(0, 15, 0, 65)
-circleBtn.Text = "+"
-circleBtn.Font = Enum.Font.GothamBold
-circleBtn.TextSize = 24
-circleBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
-circleBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", circleBtn).CornerRadius = UDim.new(1, 0)
+local toggleFarmButton = Instance.new("TextButton")
+toggleFarmButton.Size = UDim2.new(1, -20, 0, 30)
+toggleFarmButton.Position = UDim2.new(0, 10, 0, 10)
+toggleFarmButton.Text = "Bật Farm Boss"
+toggleFarmButton.Parent = mainUI
 
--- UI chính
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 350, 0, 280)
-main.Position = UDim2.new(0.5, -175, 0.5, -140)
-main.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-main.BorderSizePixel = 0
-main.BackgroundTransparency = 0.1
-main.Visible = false
+-- Nhập khoảng cách
+local radiusBox = Instance.new("TextBox")
+radiusBox.Size = UDim2.new(1, -20, 0, 30)
+radiusBox.Position = UDim2.new(0, 10, 0, 50)
+radiusBox.PlaceholderText = "Khoảng cách (VD: 22)"
+radiusBox.Text = "22"
+radiusBox.ClearTextOnFocus = false
+radiusBox.Parent = mainUI
 
-local stroke = Instance.new("UIStroke", main)
-stroke.Thickness = 2
-stroke.LineJoinMode = Enum.LineJoinMode.Round
-
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
-
--- Tiêu đề
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "phucmax"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 28
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.new(1, 1, 1)
-
--- Nút bật/tắt Farm
-local toggleFarm = Instance.new("TextButton", main)
-toggleFarm.Size = UDim2.new(0.9, 0, 0, 30)
-toggleFarm.Position = UDim2.new(0.05, 0, 0, 50)
-toggleFarm.Text = "Bật Farm Boss"
-toggleFarm.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-toggleFarm.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", toggleFarm)
-
--- Box nhập khoảng cách
-local distBox = Instance.new("TextBox", main)
-distBox.Size = UDim2.new(0.9, 0, 0, 30)
-distBox.Position = UDim2.new(0.05, 0, 0, 90)
-distBox.PlaceholderText = "Khoảng cách vd22"
-distBox.Text = ""
-distBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-distBox.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", distBox)
-
--- Nút nhạc
-local musicBtn = Instance.new("TextButton", main)
-musicBtn.Size = UDim2.new(0.9, 0, 0, 30)
-musicBtn.Position = UDim2.new(0.05, 0, 0, 130)
-musicBtn.Text = "Bật Nhạc"
-musicBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-musicBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", musicBtn)
-
--- Box nhập ID nhạc
-local musicBox = Instance.new("TextBox", main)
-musicBox.Size = UDim2.new(0.9, 0, 0, 30)
-musicBox.Position = UDim2.new(0.05, 0, 0, 170)
-musicBox.PlaceholderText = "ID Nhạc"
-musicBox.Text = ""
-musicBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-musicBox.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", musicBox)
-
--- Label máu boss
-local healthLabel = Instance.new("TextLabel", main)
-healthLabel.Size = UDim2.new(0.9, 0, 0, 30)
-healthLabel.Position = UDim2.new(0.05, 0, 0, 210)
-healthLabel.Text = "Máu Boss: ??"
-healthLabel.TextColor3 = Color3.new(1, 0, 0)
+-- Hiện máu NPC
+local healthLabel = Instance.new("TextLabel")
+healthLabel.Size = UDim2.new(0, 250, 0, 30)
+healthLabel.Position = UDim2.new(1, -260, 0, 10)
 healthLabel.BackgroundTransparency = 1
-healthLabel.TextSize = 20
+healthLabel.TextColor3 = Color3.new(1, 0, 0)
 healthLabel.Font = Enum.Font.SourceSansBold
+healthLabel.TextSize = 20
+healthLabel.Text = "Máu Boss: ??"
+healthLabel.Parent = ScreenGui
 
--- Rainbow viền + chữ
-spawn(function()
-	while true do
-		local t = tick() * 0.5
-		local r = math.sin(t) * 0.5 + 0.5
-		local g = math.sin(t + 2) * 0.5 + 0.5
-		local b = math.sin(t + 4) * 0.5 + 0.5
-		local color = Color3.new(r, g, b)
-		stroke.Color = color
-		title.TextColor3 = color
-		task.wait(0.05)
-	end
+--// Logic
+local farmActive = false
+
+toggleUIButton.MouseButton1Click:Connect(function()
+	mainUI.Visible = not mainUI.Visible
 end)
 
--- Nút bật/ẩn UI chính
-circleBtn.MouseButton1Click:Connect(function()
-	main.Visible = not main.Visible
-end)
-
--- Nút bật/tắt farm
-toggleFarm.MouseButton1Click:Connect(function()
+toggleFarmButton.MouseButton1Click:Connect(function()
 	farmActive = not farmActive
-	toggleFarm.Text = farmActive and "Tắt Farm Boss" or "Bật Farm Boss"
+	toggleFarmButton.Text = farmActive and "Tắt Farm Boss" or "Bật Farm Boss"
 end)
 
--- Nút bật/tắt nhạc
-musicBtn.MouseButton1Click:Connect(function()
-	if musicPlaying then
-		sound:Stop()
-		musicBtn.Text = "Bật Nhạc"
-	else
-		local id = tonumber(musicBox.Text)
-		if id then
-			sound.SoundId = "rbxassetid://" .. id
-			sound.Looped = true
-			sound.Volume = 1
-			sound:Play()
-			musicBtn.Text = "Tắt Nhạc"
-		end
-	end
-	musicPlaying = not musicPlaying
-end)
-
--- Tìm NPC2
+--// Hàm tìm NPC2
 function getNPC2()
 	for _, v in pairs(workspace:GetDescendants()) do
 		if v:IsA("Model") and v.Name == "NPC2" and v:FindFirstChild("HumanoidRootPart") then
@@ -161,36 +70,42 @@ function getNPC2()
 	end
 end
 
--- Auto farm loop + click
+--// Hàm lấy tool
+function getTool()
+	for _, item in pairs(player.Backpack:GetChildren()) do
+		if item:IsA("Tool") then
+			return item
+		end
+	end
+	for _, item in pairs(character:GetChildren()) do
+		if item:IsA("Tool") then
+			return item
+		end
+	end
+end
+
+--// Vòng lặp xử lý
 RunService.RenderStepped:Connect(function()
 	if not farmActive then return end
 
 	local npc = getNPC2()
 	if npc and npc:FindFirstChild("Humanoid") then
-		local npcRoot = npc.HumanoidRootPart
-		local human = npc.Humanoid
+		local npcRoot = npc:FindFirstChild("HumanoidRootPart")
+		local human = npc:FindFirstChild("Humanoid")
 
-		local dist = tonumber(distBox.Text) or 20
-		local angle = tick() * 3
-		local x = math.cos(angle) * dist
-		local z = math.sin(angle) * dist
-		local pos = npcRoot.Position + Vector3.new(x, 0, z)
+		local radius = tonumber(radiusBox.Text) or 22
+		local angle = tick() * 2
+		local x = math.cos(angle) * radius
+		local z = math.sin(angle) * radius
+		local position = npcRoot.Position + Vector3.new(x, 0, z)
 
-		hum.CFrame = CFrame.new(pos, npcRoot.Position + Vector3.new(0, 2, 0))
+		hum.CFrame = CFrame.new(position, npcRoot.Position + Vector3.new(0, 2, 0))
 
-		-- Auto Click chính giữa màn hình
-		VirtualInputManager:SendMouseButtonEvent(
-			workspace.CurrentCamera.ViewportSize.X / 2,
-			workspace.CurrentCamera.ViewportSize.Y / 2,
-			0, true, game, 0
-		)
-		VirtualInputManager:SendMouseButtonEvent(
-			workspace.CurrentCamera.ViewportSize.X / 2,
-			workspace.CurrentCamera.ViewportSize.Y / 2,
-			0, false, game, 0
-		)
+		local tool = getTool()
+		if tool and tool:FindFirstChild("Activate") then
+			tool:Activate()
+		end
 
-		-- Cập nhật máu boss
 		healthLabel.Text = "Máu Boss: " .. math.floor(human.Health) .. " / " .. math.floor(human.MaxHealth)
 	end
 end)
