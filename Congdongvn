@@ -1,111 +1,152 @@
---// Dịch vụ
+--// Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local VirtualInput = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
 
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hum = character:WaitForChild("HumanoidRootPart")
+--// GUI
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "BossFarmUI"
 
---// UI
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-ScreenGui.Name = "BossFarmUI"
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 250, 0, 190)
+main.Position = UDim2.new(0.01, 0, 0.4, 0)
+main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
+main.BackgroundTransparency = 0
+main.ClipsDescendants = true
+main.BackgroundTransparency = 0
+main.BorderColor3 = Color3.fromRGB(255, 255, 255)
+main.BackgroundTransparency = 0
+main.ZIndex = 2
+main.Parent = gui
+main:FindFirstChildOfClass("UICorner") or Instance.new("UICorner", main)
 
-local toggleUIButton = Instance.new("TextButton")
-toggleUIButton.Size = UDim2.new(0, 100, 0, 30)
-toggleUIButton.Position = UDim2.new(0, 10, 0, 10)
-toggleUIButton.Text = "Ẩn/Hiện UI"
-toggleUIButton.Parent = ScreenGui
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.Text = "PHUCBOSS FARM"
+title.TextColor3 = Color3.fromRGB(255, 255, 0)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+Instance.new("UICorner", title)
 
-local mainUI = Instance.new("Frame")
-mainUI.Size = UDim2.new(0, 200, 0, 140)
-mainUI.Position = UDim2.new(0, 10, 0, 50)
-mainUI.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-mainUI.Visible = true
-mainUI.Parent = ScreenGui
+local toggleFarm = Instance.new("TextButton", main)
+toggleFarm.Size = UDim2.new(1, -20, 0, 40)
+toggleFarm.Position = UDim2.new(0, 10, 0, 40)
+toggleFarm.Text = "Bật Farm Boss"
+toggleFarm.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+toggleFarm.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleFarm.Font = Enum.Font.Gotham
+toggleFarm.TextScaled = true
+Instance.new("UICorner", toggleFarm)
 
-local toggleFarmButton = Instance.new("TextButton")
-toggleFarmButton.Size = UDim2.new(1, -20, 0, 30)
-toggleFarmButton.Position = UDim2.new(0, 10, 0, 10)
-toggleFarmButton.Text = "Bật Farm Boss"
-toggleFarmButton.Parent = mainUI
+local toggleClick = Instance.new("TextButton", main)
+toggleClick.Size = UDim2.new(1, -20, 0, 40)
+toggleClick.Position = UDim2.new(0, 10, 0, 90)
+toggleClick.Text = "Bật Auto Click"
+toggleClick.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+toggleClick.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleClick.Font = Enum.Font.Gotham
+toggleClick.TextScaled = true
+Instance.new("UICorner", toggleClick)
 
--- Nhập khoảng cách
-local radiusBox = Instance.new("TextBox")
-radiusBox.Size = UDim2.new(1, -20, 0, 30)
-radiusBox.Position = UDim2.new(0, 10, 0, 50)
-radiusBox.PlaceholderText = "Khoảng cách (VD: 22)"
-radiusBox.Text = "22"
-radiusBox.ClearTextOnFocus = false
-radiusBox.Parent = mainUI
+local hpLabel = Instance.new("TextLabel", gui)
+hpLabel.Size = UDim2.new(0, 200, 0, 40)
+hpLabel.Position = UDim2.new(1, -210, 0, 20)
+hpLabel.Text = "HP: ???"
+hpLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+hpLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+hpLabel.Font = Enum.Font.GothamBold
+hpLabel.TextScaled = true
+hpLabel.Visible = false
+Instance.new("UICorner", hpLabel)
 
--- Hiện máu NPC
-local healthLabel = Instance.new("TextLabel")
-healthLabel.Size = UDim2.new(0, 250, 0, 30)
-healthLabel.Position = UDim2.new(1, -260, 0, 10)
-healthLabel.BackgroundTransparency = 1
-healthLabel.TextColor3 = Color3.new(1, 0, 0)
-healthLabel.Font = Enum.Font.SourceSansBold
-healthLabel.TextSize = 20
-healthLabel.Text = "Máu Boss: ??"
-healthLabel.Parent = ScreenGui
+--// Variables
+local farming = false
+local autoClicking = false
+local NPC_NAME = "NPC2"
+local TOOL_NAME = "phonglon"
 
---// Logic
-local farmActive = false
-
-toggleUIButton.MouseButton1Click:Connect(function()
-	mainUI.Visible = not mainUI.Visible
-end)
-
-toggleFarmButton.MouseButton1Click:Connect(function()
-	farmActive = not farmActive
-	toggleFarmButton.Text = farmActive and "Tắt Farm Boss" or "Bật Farm Boss"
-end)
-
---// Hàm tìm NPC2
-function getNPC2()
-	for _, v in pairs(workspace:GetDescendants()) do
-		if v:IsA("Model") and v.Name == "NPC2" and v:FindFirstChild("HumanoidRootPart") then
-			return v
-		end
-	end
+--// Auto Equip Tool
+local function equipTool()
+    local Backpack = LocalPlayer:FindFirstChild("Backpack")
+    if Backpack then
+        local tool = Backpack:FindFirstChild(TOOL_NAME)
+        if tool then
+            LocalPlayer.Character.Humanoid:EquipTool(tool)
+        end
+    end
 end
 
---// Hàm lấy tool
-function getTool()
-	for _, item in pairs(player.Backpack:GetChildren()) do
-		if item:IsA("Tool") then
-			return item
-		end
-	end
-	for _, item in pairs(character:GetChildren()) do
-		if item:IsA("Tool") then
-			return item
-		end
-	end
+--// Get Nearest NPC
+local function getNPC()
+    for _, npc in pairs(workspace:GetDescendants()) do
+        if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc.Name == NPC_NAME then
+            if npc:FindFirstChild("HumanoidRootPart") then
+                return npc
+            end
+        end
+    end
+    return nil
 end
 
---// Vòng lặp xử lý
+--// Auto Click Real
+local function autoClick()
+    VirtualInput:SendMouseButtonEvent(500, 500, 0, true, game, 0)
+    VirtualInput:SendMouseButtonEvent(500, 500, 0, false, game, 0)
+end
+
+--// Main Farm Loop
 RunService.RenderStepped:Connect(function()
-	if not farmActive then return end
+    if farming then
+        equipTool()
+        local npc = getNPC()
+        if npc then
+            local hrp = npc:FindFirstChild("HumanoidRootPart")
+            local char = LocalPlayer.Character
+            if hrp and char and char:FindFirstChild("HumanoidRootPart") then
+                local myHRP = char.HumanoidRootPart
+                -- Move in circle
+                local angle = tick() * 2
+                local offset = Vector3.new(math.cos(angle), 0, math.sin(angle)) * 22
+                myHRP.CFrame = CFrame.new(hrp.Position + offset, hrp.Position)
 
-	local npc = getNPC2()
-	if npc and npc:FindFirstChild("Humanoid") then
-		local npcRoot = npc:FindFirstChild("HumanoidRootPart")
-		local human = npc:FindFirstChild("Humanoid")
+                -- Face NPC
+                myHRP.CFrame = CFrame.lookAt(myHRP.Position, hrp.Position)
 
-		local radius = tonumber(radiusBox.Text) or 22
-		local angle = tick() * 2
-		local x = math.cos(angle) * radius
-		local z = math.sin(angle) * radius
-		local position = npcRoot.Position + Vector3.new(x, 0, z)
+                -- Show HP
+                local hp = npc.Humanoid.Health
+                local maxHp = npc.Humanoid.MaxHealth
+                hpLabel.Text = "HP: " .. math.floor(hp) .. " / " .. math.floor(maxHp)
+                hpLabel.Visible = true
+            end
+        else
+            hpLabel.Text = "HP: ???"
+            hpLabel.Visible = false
+        end
+    end
+end)
 
-		hum.CFrame = CFrame.new(position, npcRoot.Position + Vector3.new(0, 2, 0))
+--// Auto Click Loop
+task.spawn(function()
+    while true do
+        if autoClicking then
+            autoClick()
+        end
+        task.wait(0.2)
+    end
+end)
 
-		local tool = getTool()
-		if tool and tool:FindFirstChild("Activate") then
-			tool:Activate()
-		end
+--// Button Toggle
+toggleFarm.MouseButton1Click:Connect(function()
+    farming = not farming
+    toggleFarm.Text = farming and "Tắt Farm Boss" or "Bật Farm Boss"
+end)
 
-		healthLabel.Text = "Máu Boss: " .. math.floor(human.Health) .. " / " .. math.floor(human.MaxHealth)
-	end
+toggleClick.MouseButton1Click:Connect(function()
+    autoClicking = not autoClicking
+    toggleClick.Text = autoClicking and "Tắt Auto Click" or "Bật Auto Click"
 end)
